@@ -40,7 +40,7 @@ import "./styles/app.css";
 
 const navItems = [
   ["Home", "/"],
-  ["People", "#people"],
+  ["People", "/people"],
   ["Groups", "/groups"],
   ["Events", "/events"],
   ["Service Providers", "/service-providers"],
@@ -117,7 +117,7 @@ function Header() {
       <Logo />
       <nav className="main-nav" aria-label="Primary navigation">
         {navItems.map(([item, href]) => (
-          <a className={(pathname === href || (href === "/groups" && pathname.startsWith("/groups")) || (href === "/events" && pathname.startsWith("/events")) || (href === "/resources" && pathname.startsWith("/resources")) || (href === "/service-providers" && pathname.startsWith("/service-providers")) || (pathname === "/" && item === "Home")) ? "active" : ""} href={href} key={item}>
+          <a className={(pathname === href || (href === "/people" && pathname.startsWith("/people")) || (href === "/groups" && pathname.startsWith("/groups")) || (href === "/events" && pathname.startsWith("/events")) || (href === "/resources" && pathname.startsWith("/resources")) || (href === "/service-providers" && pathname.startsWith("/service-providers")) || (pathname === "/" && item === "Home")) ? "active" : ""} href={href} key={item}>
             {item}{item === "Community" && <ArrowUpRight size={13} />}
           </a>
         ))}
@@ -125,7 +125,7 @@ function Header() {
       <div className="nav-actions">
         <button aria-label="Search"><Search size={22} /></button>
         <button className="bell" aria-label="Notifications"><Bell size={21} /><span>5</span></button>
-        <span className="profile">A</span>
+        <a className="profile" href="/my-profile" aria-label="Open my profile">A</a>
         <button className="language">A~ <ChevronDown size={14} /></button>
         <button className="mobile-menu" aria-label="Open menu"><Menu /></button>
       </div>
@@ -164,6 +164,42 @@ const typeIcons = {
   "Case Study": CheckCircle2,
   Infographic: TrendingUp,
   Podcast: Mic
+};
+
+const roleMeta = {
+  Founder: { className: "founder", icon: "R", color: "#2456A0" },
+  Expert: { className: "expert", icon: "✓", color: "#1A7A4A" },
+  "Service Provider": { className: "service-provider", icon: "B", color: "#9B3BB5" },
+  Moderator: { className: "moderator", icon: "M", color: "#B8760A" }
+};
+
+const memberSpotlight = [
+  ["Vikram Anand", "Founder", "Bengaluru", 842, 4],
+  ["Dr. Ravi Kumar", "Expert", "Mysuru", 1240, 5],
+  ["Sneha Patil", "Founder", "Bengaluru", 621, 4],
+  ["Ananya Krishnan", "Service Provider", "Bengaluru", 540, 3],
+  ["Rohit Shenoy", "Expert", "Mangaluru", 980, 4]
+];
+
+const peopleDirectory = [
+  ["Vikram Anand", "Founder", "Founder @ NovaPay", "Bengaluru", ["Fintech", "SaaS"], 842, 4],
+  ["Dr. Ravi Kumar", "Expert", "Legal · LegalEdge Associates", "Mysuru", ["Legal", "Compliance"], 1240, 5],
+  ["Sneha Patil", "Founder", "Co-Founder @ AgriStack", "Bengaluru", ["Agritech", "Operations"], 621, 4],
+  ["Ananya Krishnan", "Service Provider", "CEO · GrowthHackers", "Bengaluru", ["Marketing", "SaaS"], 540, 3],
+  ["Rohit Shenoy", "Expert", "CFO Advisory · FinTax", "Mangaluru", ["Finance", "Fundraising"], 980, 4],
+  ["Meera Shetty", "Founder", "Founder @ EduBridge", "Bengaluru", ["Edtech", "Product"], 312, 2],
+  ["Karthik Rao", "Founder", "CTO @ HealthNest", "Bengaluru", ["Healthcare", "Technology"], 187, 2],
+  ["Priya Kamath", "Moderator", "Founder @ LogiRoute", "Bengaluru", ["Logistics", "Operations"], 724, 4],
+  ["Arun Hegde", "Expert", "Partner · StartupCounsel India", "Bengaluru", ["Legal", "Fundraising"], 1102, 5],
+  ["Divya Nair", "Founder", "Founder @ CleanHarvest", "Hubballi", ["Agritech", "D2C"], 445, 3],
+  ["Siddharth Bhat", "Founder", "Co-Founder @ DataVerse", "Bengaluru", ["SaaS", "Technology"], 268, 2],
+  ["Kavitha Murthy", "Service Provider", "HR · TalentFirst", "Bengaluru", ["HR", "Recruitment"], 398, 3]
+];
+
+const levelProgress = (xp, level) => {
+  const ranges = { 1: [0, 199], 2: [200, 499], 3: [500, 999], 4: [500, 999], 5: [1000, 2000] };
+  const [start, end] = ranges[level] || [0, 1000];
+  return Math.min(100, Math.max(18, ((xp - start) / (end - start)) * 100));
 };
 
 function Breadcrumb({ items }) {
@@ -368,6 +404,208 @@ function UploadResourcePage() {
 
 function UploadSection({ title, children }) {
   return <fieldset><legend>{title}</legend>{children}</fieldset>;
+}
+
+function PeopleHeader() {
+  return (
+    <section className="people-header">
+      <Breadcrumb items={["People"]} />
+      <div className="people-title-row">
+        <div>
+          <h1>Community Members</h1>
+          <p>Discover founders, experts, mentors, and service providers building Karnataka's startup ecosystem.</p>
+        </div>
+        <div className="people-header-stats">
+          {[
+            ["5,200+", "Founders"],
+            ["320+", "Experts & Mentors"],
+            ["140+", "Service Providers"],
+            ["82+", "Active Groups"]
+          ].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MemberAvatar({ name, role, size = "regular" }) {
+  const meta = roleMeta[role] || roleMeta.Founder;
+  return (
+    <span className={`member-avatar ${size} ${meta.className}`}>
+      <strong>{name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</strong>
+      <i>{meta.icon}</i>
+    </span>
+  );
+}
+
+function RoleBadge({ role }) {
+  const meta = roleMeta[role] || roleMeta.Founder;
+  return <small className={`role-badge ${meta.className}`}>{role}</small>;
+}
+
+function SpotlightCard({ member }) {
+  const [name, role, city, xp, level] = member;
+  const [followed, setFollowed] = React.useState(false);
+  return (
+    <article className="spotlight-card">
+      <MemberAvatar name={name} role={role} size="large" />
+      <h3>{name}</h3>
+      <RoleBadge role={role} />
+      <p>📍 {city}</p>
+      <div className="xp-meter"><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div>
+      <em>★ {xp.toLocaleString()} XP · Level {level}</em>
+      <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>
+    </article>
+  );
+}
+
+function MemberSpotlight() {
+  return (
+    <section className="member-spotlight">
+      <div className="spotlight-head">
+        <div><h2>★ Member Spotlight</h2><p>Top contributors and recently active members</p></div>
+        <div><button aria-label="Previous spotlight">‹</button><button aria-label="Next spotlight">›</button></div>
+      </div>
+      <div className="spotlight-row">{memberSpotlight.map((member) => <SpotlightCard key={member[0]} member={member} />)}</div>
+    </section>
+  );
+}
+
+function PeopleToolbar() {
+  return (
+    <>
+      <section className="people-toolbar">
+        <div className="resource-search"><Search size={16} /><input placeholder="Search by name, expertise, or company..." /></div>
+        {[
+          ["Role:", ["All Roles", "Founder", "Expert / SME", "Service Provider", "Moderator"]],
+          ["City:", ["All Cities", "Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi"]],
+          ["Expertise:", ["All Areas", "SaaS", "Fintech", "Agritech", "Edtech", "Healthcare", "Legal", "Finance", "Marketing", "Technology", "Operations"]],
+          ["Sort:", ["Most Active", "Newest Members", "Top XP", "A-Z"]]
+        ].map(([label, options]) => (
+          <label className="select-filter" key={label}><span>{label}</span><select>{options.map((option) => <option key={option}>{option}</option>)}</select></label>
+        ))}
+        <button className="mobile-filter"><Filter size={16} />Filter & Sort</button>
+        <div className="view-toggle"><button className="active" aria-label="Grid view"><Grid3X3 size={17} /></button><button aria-label="List view"><List size={18} /></button></div>
+        <p>Showing 5,200 members</p>
+      </section>
+      <section className="role-pill-row">
+        {[
+          ["All Members", "5,200", "all"],
+          ["Founders", "4,720", "founder"],
+          ["Experts & SMEs", "320", "expert"],
+          ["Service Providers", "140", "service-provider"],
+          ["Moderators", "20", "moderator"]
+        ].map(([label, count, tone], index) => <button className={`${tone} ${index === 0 ? "active" : ""}`} key={label}>{label} ({count})</button>)}
+      </section>
+    </>
+  );
+}
+
+function PersonCard({ person }) {
+  const [name, role, company, city, tags, xp, level] = person;
+  const [followed, setFollowed] = React.useState(false);
+  const meta = roleMeta[role] || roleMeta.Founder;
+  return (
+    <article className={`person-card ${meta.className}`}>
+      <div className="person-cover"></div>
+      <div className="person-card-body">
+        <MemberAvatar name={name} role={role} />
+        <h3>{name}</h3>
+        <RoleBadge role={role} />
+        <p className="person-company">{company}</p>
+        <p className="person-city">📍 {city}</p>
+        <div className="person-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+        <div className={`xp-strip level-${level}`}>
+          <div><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div>
+          <p><span>★ {xp.toLocaleString()} XP</span><span>Level {level}</span></p>
+        </div>
+      </div>
+      <div className="person-actions">
+        <a href="/my-profile">View Profile</a>
+        <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>
+      </div>
+    </article>
+  );
+}
+
+function PeoplePage() {
+  return (
+    <>
+      <Header />
+      <main>
+        <PeopleHeader />
+        <MemberSpotlight />
+        <PeopleToolbar />
+        <section className="people-grid">
+          {peopleDirectory.map((person) => <PersonCard key={person[0]} person={person} />)}
+        </section>
+        <nav className="pagination people-pagination" aria-label="People pagination">{["‹", "1", "2", "3", "...", "52", "›"].map((item) => <button className={item === "1" ? "active" : ""} key={item}>{item}</button>)}</nav>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function MyProfilePage() {
+  return (
+    <>
+      <Header />
+      <main className="my-profile-page">
+        <section className="profile-cover">
+          <button>Edit Cover</button>
+        </section>
+        <section className="profile-intro">
+          <MemberAvatar name="Vikram Anand" role="Founder" size="profile" />
+          <div className="profile-info-row">
+            <div>
+              <h1>Vikram Anand <RoleBadge role="Founder" /></h1>
+              <p className="username">@vikramanand</p>
+              <p>Building NovaPay for small business collections across Bharat. Active in fintech, SaaS GTM, and founder fundraising conversations.</p>
+              <div className="profile-meta"><span>📍 Bengaluru, Karnataka</span><a href="#site">novapay.in</a><a href="#linkedin">LinkedIn</a><span>Joined January 2024</span></div>
+            </div>
+            <aside className="completion-card">
+              <h2>Profile Completion</h2>
+              <div className="completion-ring"><span>70%</span></div>
+              <p>Add your LinkedIn to reach 85%</p>
+              <a href="#complete">Complete Profile →</a>
+            </aside>
+          </div>
+        </section>
+        <section className="profile-stats">{[["48", "Discussions"], ["312", "Replies"], ["5", "Groups"], ["8", "Events Attended"], ["842", "XP Points"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</section>
+        <section className="profile-xp">
+          <div><strong>★ Level 4 - Top Contributor</strong><div className="xp-meter wide"><span style={{ width: "72%" }}></span></div><small>842 / 1000 XP to Level 5</small></div>
+          <div className="badge-strip"><strong>Badges</strong>{["Top Contributor", "Best Answer x12", "Event Speaker", "Resource Author"].map((badge) => <span key={badge}>{badge}</span>)}</div>
+        </section>
+        <section className="profile-actions"><button>Edit Profile</button><button>Settings</button><button>Share Profile</button></section>
+        <nav className="profile-tabs">{["Feed", "Contributions", "Groups", "Events", "Settings"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab}>{tab}</button>)}</nav>
+        <section className="profile-feed-layout">
+          <div className="activity-feed">
+            <h2>Recent Activity</h2>
+            {[
+              ["💬", "Started a discussion:", "How SaaS founders navigate sales in 2025", "2 hours ago", "+10 XP"],
+              ["✓", "Received Best Answer on:", "Best approach for pre-seed fundraising", "1 day ago", "+25 XP"],
+              ["📅", "RSVPd Going to:", "Bengaluru Founder Meetup - May 24", "2 days ago", "+5 XP"],
+              ["👥", "Joined group:", "Fintech Builders", "1 week ago", "+5 XP"],
+              ["📄", "Uploaded resource:", "Startup Legal Checklist 2025", "2 weeks ago", "+20 XP"]
+            ].map(([icon, action, title, time, xp]) => (
+              <article key={title}><i>{icon}</i><div><p>{action} <a href="#activity">{title}</a></p><small>{time}</small><em>{xp}</em></div></article>
+            ))}
+            <a className="load-more-link" href="#more">Load More Activity →</a>
+          </div>
+          <aside className="profile-sidebar">
+            <ProfileWidget title="Interests">{["SaaS", "Fintech", "Fundraising", "Product", "Legal"].map((tag) => <span key={tag}>{tag}</span>)}</ProfileWidget>
+            <ProfileWidget title="My Groups (5)">{["Bengaluru Founders", "Fintech Builders", "Startup Funding"].map((group) => <p key={group}><strong>{group}</strong><small>Active</small></p>)}</ProfileWidget>
+            <ProfileWidget title="Community Leaderboard"><h3>#12 in Karnataka</h3><p>Top 1% of all members</p><p><strong>Vikram Anand</strong><small>842 XP</small></p></ProfileWidget>
+          </aside>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function ProfileWidget({ title, children }) {
+  return <div className="profile-widget"><h2>{title}</h2><div>{children}</div></div>;
 }
 
 const providerCategories = [
@@ -860,7 +1098,7 @@ function Hero() {
         <div className="hero-actions">
           <a className="button primary" href="#community"><Users size={17} />Join Community</a>
           <a className="button secondary" href="#events"><CalendarDays size={17} />Explore Events</a>
-          <a className="button secondary" href="#people"><Search size={17} />Find People</a>
+          <a className="button secondary" href="/people"><Search size={17} />Find People</a>
         </div>
       </div>
       <div className="hero-media">
@@ -1009,6 +1247,8 @@ function HomePage() {
 }
 
 function App() {
+  if (window.location.pathname === "/my-profile") return <MyProfilePage />;
+  if (window.location.pathname === "/people") return <PeoplePage />;
   if (window.location.pathname === "/groups/create") return <CreateGroupPage />;
   if (window.location.pathname === "/groups/bengaluru-founders") return <GroupDetailPage />;
   if (window.location.pathname === "/groups") return <GroupsPage />;
