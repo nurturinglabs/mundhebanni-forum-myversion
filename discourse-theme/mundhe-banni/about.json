@@ -1,0 +1,9 @@
+{
+  "name": "Mundhe Banni",
+  "about_url": "https://mundhebanni.com/community",
+  "license_url": null,
+  "component": false,
+  "authors": "Mundhe Banni",
+  "theme_version": "0.1.0",
+  "minimum_discourse_version": "3.2.0"
+}

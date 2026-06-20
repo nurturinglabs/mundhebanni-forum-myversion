@@ -1,0 +1,90 @@
+.d-header {
+  height: 64px;
+}
+
+.d-header #site-logo {
+  max-height: 36px;
+}
+
+#main-outlet {
+  padding-top: 18px;
+}
+
+.wrap {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.navigation-container,
+.list-controls {
+  margin-bottom: 12px;
+}
+
+.nav-pills {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+
+.nav-pills > li > a {
+  min-width: max-content;
+  padding: 8px 12px;
+}
+
+.topic-list {
+  border: 0;
+}
+
+.topic-list-item {
+  padding: 12px 0;
+}
+
+.topic-list .main-link {
+  padding-left: 0;
+}
+
+.topic-list .topic-list-data .title {
+  white-space: normal;
+}
+
+.topic-list .topic-excerpt {
+  display: block;
+}
+
+.topic-list .num {
+  font-size: 12px;
+}
+
+.topic-body {
+  padding: 14px 0;
+  border-left: 0;
+  border-right: 0;
+}
+
+.topic-avatar {
+  padding-right: 10px;
+}
+
+.topic-map {
+  border-radius: 8px;
+}
+
+#reply-control.open {
+  max-height: 100vh;
+  border-radius: 0;
+}
+
+#reply-control .composer-popup {
+  border-radius: 0;
+}
+
+.d-modal__container {
+  width: calc(100vw - 24px);
+  max-width: calc(100vw - 24px);
+}
+
+.btn-primary,
+.create-topic {
+  min-height: 42px;
+}

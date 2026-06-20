@@ -1,0 +1,73 @@
+.wrap {
+  max-width: 1440px;
+}
+
+#main-outlet {
+  padding-top: 32px;
+}
+
+.navigation-container,
+.list-controls {
+  margin-bottom: 18px;
+}
+
+.list-controls .combo-box,
+.list-controls .navigation-controls .btn {
+  height: 38px;
+}
+
+.topic-list {
+  border: 1px solid var(--mb-line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.topic-list .topic-list-item td {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.topic-list .main-link {
+  padding-left: 18px;
+}
+
+.topic-list .num {
+  padding-right: 18px;
+}
+
+.topic-post {
+  margin-bottom: 18px;
+}
+
+.topic-body {
+  border: 1px solid var(--mb-line);
+  border-radius: 8px;
+  padding: 18px 22px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.topic-avatar {
+  border-top: 0;
+}
+
+.topic-map {
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.container.posts {
+  display: block;
+}
+
+.topic-area {
+  max-width: 960px;
+}
+
+.category-list {
+  border: 1px solid var(--mb-line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}

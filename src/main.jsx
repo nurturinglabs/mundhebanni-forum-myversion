@@ -45,7 +45,7 @@ const navItems = [
   ["Events", "/events"],
   ["Service Providers", "/service-providers"],
   ["Resources", "/resources"],
-  ["Community", "#community"]
+  ["Community", "/community"]
 ];
 
 const stats = [
@@ -117,7 +117,7 @@ function Header() {
       <Logo />
       <nav className="main-nav" aria-label="Primary navigation">
         {navItems.map(([item, href]) => (
-          <a className={(pathname === href || (href === "/people" && pathname.startsWith("/people")) || (href === "/groups" && pathname.startsWith("/groups")) || (href === "/events" && pathname.startsWith("/events")) || (href === "/resources" && pathname.startsWith("/resources")) || (href === "/service-providers" && pathname.startsWith("/service-providers")) || (pathname === "/" && item === "Home")) ? "active" : ""} href={href} key={item}>
+          <a className={(pathname === href || (href === "/community" && pathname.startsWith("/community")) || (href === "/people" && pathname.startsWith("/people")) || (href === "/groups" && pathname.startsWith("/groups")) || (href === "/events" && pathname.startsWith("/events")) || (href === "/resources" && pathname.startsWith("/resources")) || (href === "/service-providers" && pathname.startsWith("/service-providers")) || (pathname === "/" && item === "Home")) ? "active" : ""} href={href} key={item}>
             {item}{item === "Community" && <ArrowUpRight size={13} />}
           </a>
         ))}
@@ -201,6 +201,71 @@ const levelProgress = (xp, level) => {
   const [start, end] = ranges[level] || [0, 1000];
   return Math.min(100, Math.max(18, ((xp - start) / (end - start)) * 100));
 };
+
+const discourseBaseUrl = "https://mundebanni-community.discourse.group";
+
+const fallbackCommunityCategories = [
+  { id: 11, name: "Fundraising", color: "2456A0", topic_count: 284, description: "Funding, investor readiness, and pitch feedback." },
+  { id: 12, name: "Product", color: "5B3DB5", topic_count: 198, description: "Product building, validation, and UX." },
+  { id: 13, name: "Legal", color: "1A7A4A", topic_count: 156, description: "Compliance, contracts, ESOPs, and IP." },
+  { id: 14, name: "Marketing", color: "C84B2F", topic_count: 142, description: "Growth, sales, and distribution." },
+  { id: 15, name: "Operations", color: "374151", topic_count: 98, description: "Hiring, process, vendors, and scale." },
+  { id: 16, name: "Technology", color: "9B3BB5", topic_count: 211, description: "Engineering, AI, data, and infrastructure." },
+  { id: 17, name: "Community", color: "E58A2B", topic_count: 304, description: "Member updates and platform conversations." },
+  { id: 1, name: "General", color: "888888", topic_count: 447, description: "Open founder discussions." }
+];
+
+const fallbackCommunityTopics = [
+  { id: 901, title: "How are Karnataka SaaS founders approaching outbound sales in 2026?", slug: "karnataka-saas-outbound-sales", posts_count: 24, views: 820, like_count: 48, category_id: 12, tags: ["saas", "sales", "type-question"], created_at: "2026-06-10T10:00:00Z", last_posted_at: "2026-06-12T15:00:00Z", posters: [{ description: "Original Poster", user: { name: "Vikram Anand", username: "vikram" } }] },
+  { id: 902, title: "Checklist for closing your first angel round in Karnataka", slug: "first-angel-round-checklist", posts_count: 18, views: 640, like_count: 36, category_id: 11, tags: ["fundraising", "legal", "type-general"], created_at: "2026-06-08T09:00:00Z", last_posted_at: "2026-06-12T11:30:00Z", posters: [{ user: { name: "Dr. Ravi Kumar", username: "ravi" } }] },
+  { id: 903, title: "Share your best low-cost hiring channels for early startup teams", slug: "low-cost-hiring-channels", posts_count: 31, views: 940, like_count: 55, category_id: 15, tags: ["hiring", "operations", "type-idea"], created_at: "2026-06-06T09:00:00Z", last_posted_at: "2026-06-11T18:30:00Z", posters: [{ user: { name: "Meera Shetty", username: "meera" } }] },
+  { id: 904, title: "Community update: Bengaluru founder breakfast moves to July", slug: "bengaluru-founder-breakfast-july", posts_count: 9, views: 420, like_count: 22, category_id: 17, tags: ["events", "type-announcement"], created_at: "2026-06-05T09:00:00Z", last_posted_at: "2026-06-10T08:10:00Z", posters: [{ user: { name: "Mundhe Banni Team", username: "admin" } }] },
+  { id: 905, title: "What should agritech founders measure before approaching investors?", slug: "agritech-investor-metrics", posts_count: 14, views: 510, like_count: 29, category_id: 11, tags: ["agritech", "fundraising", "type-question"], created_at: "2026-06-03T09:00:00Z", last_posted_at: "2026-06-09T14:30:00Z", posters: [{ user: { name: "Sneha Patil", username: "sneha" } }] },
+  { id: 906, title: "Recommended accounting stack for seed-stage startups in India", slug: "accounting-stack-seed-stage-india", posts_count: 12, views: 388, like_count: 19, category_id: 13, tags: ["finance", "legal", "type-question"], created_at: "2026-06-02T09:00:00Z", last_posted_at: "2026-06-08T16:00:00Z", posters: [{ user: { name: "Rohit Shenoy", username: "rohit" } }] }
+];
+
+const communityCache = new Map();
+
+function useCommunitySWR(path, fallbackData) {
+  const [state, setState] = React.useState(() => ({
+    data: communityCache.get(path) || fallbackData,
+    error: null,
+    isLoading: !communityCache.has(path)
+  }));
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setState((current) => ({ ...current, isLoading: !communityCache.has(path), error: null }));
+    fetch(`/api/discourse/${path}`)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Discourse proxy returned ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        communityCache.set(path, data);
+        if (!cancelled) setState({ data, error: null, isLoading: false });
+      })
+      .catch((error) => {
+        if (!cancelled) setState((current) => ({ data: current.data || fallbackData, error, isLoading: false }));
+      });
+    return () => { cancelled = true; };
+  }, [path]);
+
+  return state;
+}
+
+const stripHtml = (value = "") => value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+const relativeTime = (value) => {
+  if (!value) return "recently";
+  const diff = Date.now() - new Date(value).getTime();
+  const hours = Math.max(1, Math.round(diff / 3600000));
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.round(days / 30)}mo ago`;
+};
+const categoryColor = (category) => `#${(category?.color || "888888").replace("#", "")}`;
+const topicUrl = (topic) => `${discourseBaseUrl}/t/${topic.slug || "topic"}/${topic.id}`;
 
 function Breadcrumb({ items }) {
   return (
@@ -1096,7 +1161,7 @@ function Hero() {
         <h1>Build Your Startup<br />Faster. <span>Together.</span></h1>
         <p>Mundhe Banni is Karnataka's most trusted network of founders, experts, investors and service providers.</p>
         <div className="hero-actions">
-          <a className="button primary" href="#community"><Users size={17} />Join Community</a>
+          <a className="button primary" href="/community"><Users size={17} />Join Community</a>
           <a className="button secondary" href="#events"><CalendarDays size={17} />Explore Events</a>
           <a className="button secondary" href="/people"><Search size={17} />Find People</a>
         </div>
@@ -1122,7 +1187,8 @@ function Stats() {
 }
 
 function SectionHeader({ title, link }) {
-  return <div className="section-header"><h2>{title}</h2>{link && <a href="#view">{link} <ChevronRight size={15} /></a>}</div>;
+  const href = link === "Go to Community" ? "/community" : "#view";
+  return <div className="section-header"><h2>{title}</h2>{link && <a href={href}>{link} <ChevronRight size={15} /></a>}</div>;
 }
 
 function EventCards() {
@@ -1220,8 +1286,431 @@ function Resources() {
   );
 }
 
+function CommunityPage() {
+  const [loginOpen, setLoginOpen] = React.useState(false);
+  const [activeCategory, setActiveCategory] = React.useState("All");
+  const [query, setQuery] = React.useState("");
+  const [sort, setSort] = React.useState("latest.json?page=0");
+  const categoriesState = useCommunitySWR("categories.json", { category_list: { categories: fallbackCommunityCategories } });
+  const statsState = useCommunitySWR("site/statistics.json", {});
+  const topicsState = useCommunitySWR(sort, { topic_list: { topics: fallbackCommunityTopics } });
+  const trendingState = useCommunitySWR("top.json?period=weekly", { topic_list: { topics: fallbackCommunityTopics.slice(0, 5) } });
+  const liveCategories = categoriesState.data?.category_list?.categories || [];
+  const categories = liveCategories.length >= fallbackCommunityCategories.length ? liveCategories : fallbackCommunityCategories;
+  const categoryMap = new Map(categories.map((category) => [category.id, category]));
+  const allTopics = topicsState.data?.topic_list?.topics?.length ? topicsState.data.topic_list.topics : fallbackCommunityTopics;
+  const topics = activeCategory === "All" ? allTopics : allTopics.filter((topic) => categoryMap.get(topic.category_id)?.name === activeCategory);
+  const offline = Boolean(categoriesState.error || topicsState.error || statsState.error);
+  const searchResults = query.trim() ? topics.filter((topic) => topic.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [];
+
+  return (
+    <>
+      <Header />
+      <main>
+        <section className="community-header">
+          <Breadcrumb items={["Community"]} />
+          <div className="community-title-row">
+            <div><h1>Community Discussions</h1><p>Ask questions, share ideas, and learn from 5,200+ Karnataka founders.</p></div>
+            <div className="community-actions">
+              <a className="forum-link" href={discourseBaseUrl}>Go to Full Forum <ArrowUpRight size={14} /></a>
+              <button onClick={() => setLoginOpen(true)}>+ Start Discussion</button>
+              <small className={offline ? "offline" : ""}><i></i>{offline ? "Forum offline - showing cached content" : "Forum live · Powered by Discourse"}</small>
+            </div>
+          </div>
+        </section>
+        {offline && <div className="community-warning">⚠️ Could not load live discussions. Showing cached content while the forum is unavailable.</div>}
+        <CommunityStats stats={statsState.data} loading={statsState.isLoading} offline={Boolean(statsState.error)} />
+        <section className="community-tabs">
+          <nav>{["All", "Featured", "My Groups", "Following"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab} onClick={() => index > 1 && setLoginOpen(true)}>{tab}{tab === "My Groups" && <span>3 new</span>}</button>)}</nav>
+          <label className="select-filter"><span>Sort:</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="latest.json?page=0">Latest</option><option value="top.json?period=all">Most Liked</option><option value="top.json?period=weekly">Trending</option><option value="latest.json?filter=unsolved">Unanswered</option></select></label>
+          <div className="view-toggle"><button aria-label="Grid view"><Grid3X3 size={16} /></button><button className="active" aria-label="List view"><List size={17} /></button></div>
+        </section>
+        <section className="community-search-row">
+          <div className="community-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search discussions, questions, and ideas..." />{searchResults.length > 0 && <div className="search-popover">{searchResults.map((topic) => <a href={topicUrl(topic)} key={topic.id}><strong>{topic.title}</strong><span>{categoryMap.get(topic.category_id)?.name || "General"} · {topic.posts_count || 0} replies</span></a>)}<a href={`${discourseBaseUrl}/search?q=${encodeURIComponent(query)}`}>Search in full forum →</a></div>}</div>
+          <div className="filter-chips"><span>saas ×</span><span>fundraising ×</span><a href="#clear">Clear all</a></div>
+        </section>
+        <section className="community-layout">
+          <CommunityLeftRail categories={categories} activeCategory={activeCategory} onCategory={setActiveCategory} loading={categoriesState.isLoading} />
+          <CommunityFeed topics={topics} categories={categoryMap} loading={topicsState.isLoading} offline={Boolean(topicsState.error)} onLogin={() => setLoginOpen(true)} />
+          <CommunityRightRail topics={trendingState.data?.topic_list?.topics || fallbackCommunityTopics} categories={categoryMap} />
+        </section>
+      </main>
+      <Footer />
+      <button className="community-mobile-start" onClick={() => setLoginOpen(true)}>+ Start Discussion</button>
+      {loginOpen && <LoginPlaceholderModal onClose={() => setLoginOpen(false)} />}
+    </>
+  );
+}
+
+function CommunityStats({ stats, loading, offline }) {
+  const values = [
+    [MessageCircle, stats?.topics_count || "2,840+", "Total Discussions"],
+    [FileText, stats?.posts_count || "18,200+", "Total Replies"],
+    [Users, stats?.users_count || "5,200+", "Active Members"],
+    [TrendingUp, stats?.topics_7_days || "148", "New This Week"],
+    [CheckCircle2, "940+", "Questions Answered"]
+  ];
+  return <section className="community-stats">{values.map(([Icon, value, label]) => <div key={label}>{loading ? <span className="skeleton short"></span> : <><Icon size={22} /><p><strong>{offline ? `~${value}` : value}</strong><span>{label}</span></p></>}</div>)}</section>;
+}
+
+function CommunityLeftRail({ categories, activeCategory, onCategory, loading }) {
+  const tags = ["saas", "fundraising", "legal", "fintech", "product", "agritech", "operations", "hiring"];
+  return (
+    <aside className="community-left-rail">
+      <h2>Categories</h2>
+      {loading ? <SkeletonList /> : <div className="community-category-list"><button className={activeCategory === "All" ? "active" : ""} onClick={() => onCategory("All")}><i style={{ background: "#e58a2b" }}></i><span>All</span><small>{categories.reduce((sum, category) => sum + (category.topic_count || 0), 0)}</small></button>{categories.map((category) => <button className={activeCategory === category.name ? "active" : ""} key={category.id} onClick={() => onCategory(category.name)} style={{ "--category-color": categoryColor(category) }}><i></i><span>{category.name}</span><small>{category.topic_count || 0}</small></button>)}</div>}
+      <a href={`${discourseBaseUrl}/categories`}>View All Categories →</a>
+      <hr />
+      <h2>Popular Tags</h2>
+      <div className="community-tags">{tags.map((tag, index) => <button className={index < 2 ? "active" : ""} key={tag}>{tag}</button>)}</div>
+      <hr />
+      <h2>Post Type</h2>
+      {["💬 All Types", "❓ Questions only", "📢 Announcements", "💡 Ideas"].map((type, index) => <label className="type-check" key={type}><input type="checkbox" defaultChecked={index === 0} />{type}</label>)}
+      <hr />
+      <h2>My Activity</h2>
+      <p className="login-note">Login to see your activity</p>
+    </aside>
+  );
+}
+
+function CommunityFeed({ topics, categories, loading, offline, onLogin }) {
+  const pinned = topics[0] || fallbackCommunityTopics[0];
+  return (
+    <section className="community-feed">
+      {offline && <div className="feed-warning">⚠️ Could not load discussions. The forum may be temporarily unavailable. <a href="/community">Try refreshing →</a></div>}
+      {loading ? <SkeletonList rows={5} /> : <>
+        <article className="pinned-discourse-post"><small>📌 Pinned</small><a href={topicUrl(pinned)}>{pinned.title}</a><p>Welcome to the Mundhe Banni community forum. Use this space to ask, share, and help other Karnataka founders move faster.</p><CommunityTopicMeta topic={pinned} category={categories.get(pinned.category_id)} /></article>
+        <div className="community-topic-list">{topics.map((topic) => <CommunityTopicRow topic={topic} category={categories.get(topic.category_id)} onLogin={onLogin} key={topic.id} />)}</div>
+        <button className="load-more">Load More Discussions</button>
+      </>}
+    </section>
+  );
+}
+
+function CommunityTopicRow({ topic, category, onLogin }) {
+  const type = topic.tags?.find((tag) => tag.startsWith("type-"))?.replace("type-", "") || "general";
+  const typeIcon = { question: "?", announcement: "📢", idea: "💡", general: "💬" }[type] || "💬";
+  const author = topic.posters?.[0]?.user?.name || topic.posters?.[0]?.user?.username || "Community member";
+  const tags = (topic.tags || []).filter((tag) => !tag.startsWith("type-")).slice(0, 3);
+  return (
+    <article className={`community-topic-row ${type}`}>
+      <i>{typeIcon}</i>
+      <div>
+        <div className="topic-badges"><span style={{ "--category-color": categoryColor(category) }}>{category?.name || "General"}</span>{type === "question" && topic.posts_count > 2 && <em>✓ Answered</em>}</div>
+        <a className="topic-title" href={topicUrl(topic)}>{topic.title}</a>
+        <p>{stripHtml(topic.excerpt || "Join this discussion with other founders and operators from the Mundhe Banni community.").slice(0, 120)}...</p>
+        <div className="topic-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+        <small><b>{author}</b> · {relativeTime(topic.last_posted_at || topic.created_at)} · <button>Quick Preview</button></small>
+      </div>
+      <aside><span>💬 {topic.posts_count || 0}</span><span>👁 {topic.views || 0}</span><span>▲ {topic.like_count || 0}</span><button onClick={onLogin} aria-label="Save topic"><Bookmark size={16} /></button></aside>
+    </article>
+  );
+}
+
+function CommunityTopicMeta({ topic, category }) {
+  return <div className="community-topic-meta"><span style={{ "--category-color": categoryColor(category) }}>{category?.name || "General"}</span><small>{(topic.tags || []).filter((tag) => !tag.startsWith("type-")).slice(0, 2).join(" · ") || "community"}</small><small>{topic.posts_count || 0} replies · {relativeTime(topic.last_posted_at)}</small></div>;
+}
+
+function CommunityRightRail({ topics, categories }) {
+  return (
+    <aside className="community-right-rail">
+      <CommunityWidget title="🔥 Trending This Week">{topics.slice(0, 5).map((topic, index) => <a className="trend-row" href={topicUrl(topic)} key={topic.id}><b>{index + 1}</b><span>{topic.title}<small>▲ {topic.like_count || 0} · 💬 {topic.posts_count || 0}</small></span></a>)}<a href={`${discourseBaseUrl}/top`}>View All Trending →</a></CommunityWidget>
+      <CommunityWidget title="👥 Active Today"><div className="active-avatars">{["VA", "RK", "SP", "AK", "MS", "RS"].map((avatar) => <span key={avatar}>{avatar}</span>)}</div><p>42 members posted today</p></CommunityWidget>
+      <CommunityWidget title="❓ Needs Answers">{fallbackCommunityTopics.filter((topic) => topic.tags.includes("type-question")).slice(0, 3).map((topic) => <a className="need-row" href={topicUrl(topic)} key={topic.id}>{topic.title}<small>Needs more answers</small></a>)}</CommunityWidget>
+      <CommunityWidget title="💬 My Groups"><p className="login-note">Join groups to see activity here</p></CommunityWidget>
+      <CommunityWidget title="⭐ Top Contributors">{["Vikram Anand", "Dr. Ravi Kumar", "Sneha Patil", "Rohit Shenoy", "Meera Shetty"].map((name, index) => <div className="contributor-row" key={name}><b>{index + 1}</b><span>{name.slice(0, 2).toUpperCase()}</span><strong>{name}</strong><em>★ {900 - index * 70}</em></div>)}</CommunityWidget>
+    </aside>
+  );
+}
+
+function CommunityWidget({ title, children }) {
+  return <div className="community-widget"><h2>{title}</h2>{children}</div>;
+}
+
+function SkeletonList({ rows = 3 }) {
+  return <div className="skeleton-list">{Array.from({ length: rows }).map((_, index) => <div key={index}><span></span><span></span><span></span></div>)}</div>;
+}
+
+function LoginPlaceholderModal({ onClose }) {
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="community-login-title">
+      <div className="community-login-modal">
+        <button className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
+        <h2 id="community-login-title">Login to continue</h2>
+        <p>Discourse Connect SSO is planned for Phase 2. For now, the community is available in read-only mode.</p>
+        <button>Continue with Google</button>
+        <button>Continue with LinkedIn</button>
+        <div><span></span>or<span></span></div>
+        <input placeholder="Email address" />
+        <input type="password" placeholder="Password" />
+        <button className="primary-login">Login →</button>
+        <a href="#join">New to Mundhe Banni? Join free →</a>
+      </div>
+    </div>
+  );
+}
+
+const adminNav = [
+  ["Overview", [["📊", "Dashboard", "/admin", ""]]],
+  ["Moderation", [["🚩", "Content Moderation", "/admin/moderation", "12"], ["📚", "Resource Approvals", "/admin/resources", "9"], ["💼", "Provider Approvals", "/admin/providers", "8"], ["👥", "Group Approvals", "/admin/groups", "5"], ["🎭", "Role Requests", "/admin/roles", "5"]]],
+  ["Management", [["👤", "Users", "/admin/users", ""], ["📅", "Events", "/admin/events", ""], ["🏷", "Categories & Tags", "/admin/taxonomy", ""]]],
+  ["Insights", [["📈", "Analytics", "/admin/analytics", ""], ["📋", "Audit Log", "/admin/audit-log", ""]]],
+  ["Configuration", [["⚙️", "Platform Settings", "/admin/settings", ""], ["🎌", "Banners & Features", "/admin/banners", ""]]]
+];
+
+const adminTitles = {
+  "/admin": "Dashboard",
+  "/admin/moderation": "Content Moderation",
+  "/admin/resources": "Resource Approvals",
+  "/admin/providers": "Service Provider Approvals",
+  "/admin/groups": "Group Management",
+  "/admin/roles": "Role Upgrade Requests",
+  "/admin/users": "User Management",
+  "/admin/events": "Event Management",
+  "/admin/taxonomy": "Categories & Tags",
+  "/admin/analytics": "Analytics",
+  "/admin/audit-log": "Audit Log",
+  "/admin/settings": "Platform Settings",
+  "/admin/banners": "Banners & Features"
+};
+
+const adminMetrics = [
+  ["Total Members", "5,247", "▲ 8.2%", "positive"],
+  ["Active This Week", "1,842", "▲ 4.1%", "positive"],
+  ["Pending Approvals", "28", "▼ 15%", "warning"],
+  ["New Discussions", "312", "▲ 22%", "positive"],
+  ["Flagged Content", "6", "▼ 40%", "danger"]
+];
+
+const moderationRows = [
+  ["Check out this amazing investment opportunity", "Promotional copy with repeated links and aggressive claims.", "user_8821", "New", "Spam", "12 min ago", "Review"],
+  ["How SaaS founders are navigating sales cycles in 2025?", "Possible duplicate of an older thread reported by Priya K.", "Arjun Nair", "Founder", "User-Reported", "1 hour ago", "Review"],
+  ["Best legal firm for startup incorporation?", "Auto-flagged for external contact info pattern.", "Rohit Mehta", "Founder", "Off-Topic", "3 hours ago", "Review"]
+];
+
+const adminTables = {
+  resources: {
+    subtitle: "Review resources submitted by SMEs and Admins before they go live.",
+    tabs: ["Pending (9)", "Published", "Rejected", "Archived"],
+    columns: ["Resource", "Submitted By", "Type", "Access", "Submitted", "Status", "Actions"],
+    rows: [
+      ["Startup Fundraising Playbook 2025", "Dr. Ravi Kumar", "Whitepaper", "Open", "2h ago", "Review"],
+      ["Karnataka Compliance Checklist", "LegalEdge Associates", "eBook", "Gated", "5h ago", "Review"],
+      ["GTM Strategies for B2B SaaS", "Ananya K.", "Video", "Open", "1d ago", "Review"]
+    ]
+  },
+  providers: {
+    subtitle: "Review new listings and manage verified status for the marketplace.",
+    tabs: ["Pending (8)", "Live", "Rejected"],
+    columns: ["Company", "Category", "City", "Submitted", "Status", "Verified", "Actions"],
+    rows: [
+      ["BrightPath Legal", "Legal", "Bengaluru", "5h ago", "Pending", "Off"],
+      ["QuantEdge Analytics", "Technology", "Mysuru", "1d ago", "Pending", "Off"],
+      ["CFO Bridge Consulting", "Finance", "Bengaluru", "2d ago", "Pending", "Off"]
+    ]
+  },
+  groups: {
+    subtitle: "Approve new groups, manage existing communities, and assign admins.",
+    tabs: ["Pending Approval (5)", "Active Groups", "Archived"],
+    columns: ["Group Name", "Category", "Created By", "Privacy", "Submitted", "Actions"],
+    rows: [
+      ["Logistics Founders Karnataka", "Operations", "Karthik R.", "Public", "3h ago"],
+      ["AI Builders Bengaluru", "Technology", "Divya N.", "Public", "1d ago"],
+      ["Founders Over 40", "Founder/General", "Suresh M.", "Invite-Only", "2d ago"]
+    ]
+  },
+  roles: {
+    subtitle: "Review requests from Founders to become an SME/Expert or Service Provider.",
+    tabs: ["Pending (5)", "Approved", "Rejected"],
+    columns: ["User", "Requested Role", "Reason/Bio Submitted", "Submitted", "Actions"],
+    rows: [
+      ["Dr. Ravi Kumar", "SME/Expert", "15 years in startup legal advisory...", "2h ago"],
+      ["Ananya Krishnan", "Service Provider", "Founder of GrowthHackers Agency...", "1d ago"],
+      ["Suresh Iyer", "SME/Expert", "Ex-VC, now angel investing...", "2d ago"]
+    ]
+  },
+  users: {
+    subtitle: "Search, manage roles, and moderate platform members.",
+    columns: ["User", "Role", "City", "Joined", "Last Active", "XP", "Status", "Actions"],
+    rows: [
+      ["Vikram Anand", "Founder", "Bengaluru", "Jan 2024", "Today", "842", "Active"],
+      ["Dr. Ravi Kumar", "SME/Expert", "Mysuru", "Feb 2024", "2h ago", "1,240", "Active"],
+      ["user_8821", "Founder", "Unknown", "Today", "12m ago", "0", "Suspended"]
+    ]
+  },
+  events: {
+    subtitle: "Manage all platform events, RSVPs, and flagship event logistics.",
+    columns: ["Event", "Type", "Organiser", "Date", "RSVPs", "Status", "Actions"],
+    rows: [
+      ["Karnataka Startup Summit 2025", "Flagship", "Mundhe Banni", "May 30", "428 / 500", "Live"],
+      ["Bengaluru Founder Meetup", "Group Meetup", "Bengaluru Founders", "May 24", "42 / 80", "Live"],
+      ["SaaS AMA Session", "Group Meetup", "Bengaluru Founders", "Jun 8", "29 / 100", "Live"]
+    ]
+  }
+};
+
+function AdminShell({ children }) {
+  const pathname = window.location.pathname;
+  return (
+    <div className="admin-shell">
+      <aside className="admin-sidebar">
+        <div className="admin-brand"><Logo /><span>Admin</span></div>
+        <nav>
+          {adminNav.map(([section, items]) => (
+            <div className="admin-nav-section" key={section}>
+              <h2>{section}</h2>
+              {items.map(([icon, label, href, badge]) => <a className={pathname === href ? "active" : ""} href={href} key={href}><span>{icon}</span><strong>{label}</strong>{badge && <em>{badge}</em>}</a>)}
+            </div>
+          ))}
+        </nav>
+        <div className="admin-profile"><span>VA</span><div><strong>Vikram A.</strong><small>Platform Admin</small></div><a href="/">← Back to Site</a></div>
+      </aside>
+      <header className="admin-topbar">
+        <h1>{adminTitles[pathname] || "Dashboard"}</h1>
+        <div className="admin-top-actions"><div><Search size={15} /><input placeholder="Search users, posts, listings..." /></div><button aria-label="Admin notifications"><Bell size={20} /><i></i></button><span>VA</span></div>
+      </header>
+      <main className="admin-content">{children}</main>
+    </div>
+  );
+}
+
+function AdminPageHeader({ title, subtitle, action }) {
+  return <div className="admin-page-header"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{action || <select><option>Last 30 Days</option><option>Last 90 Days</option></select>}</div>;
+}
+
+function AdminDashboard() {
+  return (
+    <AdminShell>
+      <AdminPageHeader title="Dashboard" subtitle="Platform health and activity at a glance." />
+      <section className="admin-metric-grid">{adminMetrics.map(([label, value, trend, tone]) => <article className={tone} key={label}><div><span>{label}</span><em>{trend}</em></div><strong>{value}</strong><small>vs last period</small></article>)}</section>
+      <section className="admin-chart-row">
+        <article className="admin-card growth-card"><div className="admin-card-head"><h3>User Growth</h3><span><button>Daily</button><button className="active">Weekly</button><button>Monthly</button></span></div><div className="line-chart"><svg viewBox="0 0 600 230" preserveAspectRatio="none"><path d="M0 190 L55 178 L110 156 L165 162 L220 132 L275 126 L330 96 L385 110 L440 72 L495 58 L550 42 L600 26" fill="none" stroke="#e58a2b" strokeWidth="5"/><path d="M0 190 L55 178 L110 156 L165 162 L220 132 L275 126 L330 96 L385 110 L440 72 L495 58 L550 42 L600 26 L600 230 L0 230 Z" fill="rgba(229,138,43,.12)"/></svg></div></article>
+        <article className="admin-card role-card"><h3>Members by Role</h3><div className="donut"><span>5,247</span></div><div className="role-legend">{[["Founder", "68%", "#2456A0"], ["Service Provider", "12%", "#9B3BB5"], ["SME/Expert", "6%", "#1A7A4A"], ["Moderator", "1%", "#B8760A"], ["Admin", "<1%", "#C84B2F"]].map(([role, percent, color]) => <p key={role}><i style={{ background: color }}></i>{role}<b>{percent}</b></p>)}</div></article>
+      </section>
+      <section className="admin-card city-card"><h3>Members by City</h3>{[["Bengaluru", 3420], ["Mysuru", 640], ["Mangaluru", 480], ["Hubballi", 380], ["Belagavi", 210], ["Other", 117]].map(([city, count]) => <div className="city-row" key={city}><span>{city}</span><div><i style={{ width: `${Math.max(8, count / 34)}%` }}></i></div><b>{count}</b></div>)}</section>
+      <section className="admin-bottom-row"><AdminActivity /><AdminAttention /></section>
+    </AdminShell>
+  );
+}
+
+function AdminActivity() {
+  const rows = [["🚩", "Post flagged for spam: 'Check out this amazing deal...'", "12 min ago"], ["✓", "Approved listing: CodeCraft Technologies", "1 hour ago"], ["👤", "New SME role request: Dr. Ravi Kumar", "2 hours ago"], ["📝", "New group created: Logistics Founders Karnataka", "3 hours ago"], ["💼", "New provider submission: BrightPath Legal", "5 hours ago"], ["✓", "Resource approved: ESOP Guide 2025", "6 hours ago"]];
+  return <article className="admin-card"><h3>Recent Activity</h3><div className="admin-activity">{rows.map(([icon, text, time]) => <p key={text}><i>{icon}</i><span>{text}</span><small>{time}</small></p>)}</div><a className="admin-link" href="/admin/audit-log">View Full Audit Log →</a></article>;
+}
+
+function AdminAttention() {
+  return <article className="admin-card"><h3>Needs Your Attention</h3>{[["🚩 6 flagged posts", "/admin/moderation"], ["📚 9 resources pending", "/admin/resources"], ["💼 8 provider listings pending", "/admin/providers"], ["🎭 5 role requests pending", "/admin/roles"]].map(([label, href]) => <a className="attention-row" href={href} key={label}><span>{label}</span><em>Review →</em></a>)}</article>;
+}
+
+function AdminModerationPage() {
+  const [preview, setPreview] = React.useState(null);
+  return (
+    <AdminShell>
+      <AdminPageHeader title="Content Moderation" subtitle="Posts flagged by automated moderation or reported by community members." />
+      <AdminTabs tabs={["Pending Review (12)", "Approved", "Rejected", "All"]} />
+      <AdminFilters search="Search post content or author..." filters={["Flag Reason", "Category", "Date Range"]} />
+      <section className="admin-table-card">
+        <div className="admin-table moderation"><div>Post</div><div>Author</div><div>Flag Reason</div><div>Flagged</div><div>Status</div><div>Actions</div>{moderationRows.map((row) => <React.Fragment key={row[0]}><button className="admin-post-cell" onClick={() => setPreview(row)}><strong>{row[0]}</strong><small>{row[1]}</small><span>General</span></button><AdminUserCell name={row[2]} role={row[3]} /><div><span className={`admin-pill ${row[4].toLowerCase().replace("-", "")}`}>{row[4]}</span>{row[4] === "User-Reported" && <small>by Priya K.</small>}</div><div>{row[5]}</div><div><span className="admin-pill review">⏳ {row[6]}</span></div><AdminActions /></React.Fragment>)}</div>
+      </section>
+      <nav className="pagination admin-pagination">{["‹", "1", "2", "3", "›"].map((item) => <button className={item === "1" ? "active" : ""} key={item}>{item}</button>)}</nav>
+      {preview && <AdminPreviewModal row={preview} onClose={() => setPreview(null)} />}
+    </AdminShell>
+  );
+}
+
+function AdminGenericTablePage({ type, title }) {
+  const config = adminTables[type];
+  return (
+    <AdminShell>
+      <AdminPageHeader title={title} subtitle={config.subtitle} action={type === "users" ? <button className="admin-outline">📤 Bulk Import Users</button> : type === "events" ? <button className="admin-primary">+ Create Flagship Event</button> : null} />
+      {config.tabs && <AdminTabs tabs={config.tabs} />}
+      {(type === "users" || type === "events") && <AdminFilters search={type === "users" ? "Search by name, email, or username..." : "Search events..."} filters={type === "users" ? ["Role", "Status", "City"] : ["Type", "Status", "Date"]} />}
+      <AdminDataTable columns={config.columns} rows={config.rows} type={type} />
+      {type === "providers" && <AdminEnquiries />}
+      {type === "groups" && <AdminFeaturedGroup />}
+    </AdminShell>
+  );
+}
+
+function AdminTabs({ tabs }) {
+  return <nav className="admin-tabs">{tabs.map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab}>{tab}</button>)}</nav>;
+}
+
+function AdminFilters({ search, filters }) {
+  return <section className="admin-filters">{filters.map((filter) => <select key={filter}><option>{filter}</option><option>All</option></select>)}<div><Search size={15} /><input placeholder={search} /></div></section>;
+}
+
+function AdminDataTable({ columns, rows, type }) {
+  return (
+    <section className="admin-table-card">
+      <div className="admin-data-table" style={{ "--admin-cols": `repeat(${columns.length}, minmax(120px, 1fr))` }}>
+        {columns.map((column) => <div className="admin-th" key={column}>{column}</div>)}
+        {rows.map((row) => row.map((cell, index) => <div className="admin-td" key={`${row[0]}-${index}`}>{index === 0 ? <strong>{cell}</strong> : cell === "Review" || cell === "Pending" || cell === "Live" || cell === "Active" ? <span className={`admin-pill ${cell.toLowerCase()}`}>{cell}</span> : index === row.length - 1 && columns.at(-1) === "Actions" ? <AdminActions compact /> : cell}</div>))}
+        {rows.map((row) => columns.length > row.length && <div className="admin-td" key={`${row[0]}-actions`}><AdminActions compact /></div>)}
+      </div>
+    </section>
+  );
+}
+
+function AdminUserCell({ name, role }) {
+  return <div className="admin-user-cell"><span>{name.slice(0, 2).toUpperCase()}</span><div><strong>{name}</strong><small>{role}</small></div></div>;
+}
+
+function AdminActions({ compact = false }) {
+  return <div className="admin-actions"><button className="approve">✓ {compact ? "" : "Approve"}</button><button>✎ {compact ? "" : "Edit"}</button><button className="reject">✕ {compact ? "" : "Reject"}</button></div>;
+}
+
+function AdminPreviewModal({ row, onClose }) {
+  return <div className="modal-overlay"><div className="admin-preview-modal"><button className="modal-close" onClick={onClose}><X /></button><h2>{row[0]}</h2><AdminUserCell name={row[2]} role={row[3]} /><p>{row[1]} This is the full post content preview shown to the platform admin before taking a moderation action.</p><div className="flag-box"><strong>Flagged for: {row[4]}</strong><small>Auto-detected or reported by community moderation.</small></div><small>This author has 2 previous flags. <a href="#history">View history →</a></small><div className="admin-modal-actions"><button>✓ Approve & Publish</button><button>✎ Edit Content</button><button>✕ Reject & Remove</button></div></div></div>;
+}
+
+function AdminEnquiries() {
+  return <section className="admin-card admin-secondary-section"><div className="admin-card-head"><h3>All Enquiry Submissions</h3><button className="admin-outline">⬇ Export CSV</button></div><AdminDataTable columns={["Provider", "Founder Name", "Requirement Type", "Date", "Status"]} rows={[["LegalEdge Associates", "Meera Rao", "ESOP Setup", "Today", "New"], ["FinTax Consultants", "Arjun Nair", "Tax Planning", "Yesterday", "Responded"]]} type="enquiries" /></section>;
+}
+
+function AdminFeaturedGroup() {
+  return <section className="admin-card admin-secondary-section"><h3>Homepage Featured Group</h3><div className="featured-admin-card"><span>🏙️</span><div><strong>Bengaluru Founders</strong><small>1,200 members · Active discussions</small></div><select><option>Change Featured Group</option></select><button className="admin-primary">Update</button></div><label className="admin-switch"><input type="checkbox" defaultChecked />Auto-rotate weekly</label></section>;
+}
+
+function AdminTaxonomyPage() {
+  return <AdminShell><AdminPageHeader title="Categories & Tags" subtitle="Manage the discussion taxonomy used across the Community page." action={<button className="admin-primary">+ New Category</button>} /><p className="admin-note">Changes here sync with the connected Discourse forum.</p><AdminTabs tabs={["Categories", "Tags"]} /><AdminDataTable columns={["Color", "Name", "Description", "Topics", "Actions"]} rows={[["🔵", "Fundraising", "Term sheets, investors, valuations", "12"], ["🟣", "Product", "Product strategy, roadmaps, MVPs", "8"], ["🟢", "Legal", "Incorporation, compliance, contracts", "15"], ["🔴", "Marketing", "Growth, SEO, branding", "6"], ["⚫", "Operations", "Hiring, processes, vendor mgmt", "4"], ["🟪", "Technology", "Engineering, AI tools, stack", "19"]]} type="taxonomy" /></AdminShell>;
+}
+
+function AdminAnalyticsPage() {
+  return <AdminShell><AdminPageHeader title="Analytics" subtitle="Growth, engagement, content, events, and marketplace reporting." action={<button className="admin-outline">⬇ Export Report</button>} /><AdminTabs tabs={["Growth", "Engagement", "Content", "Events", "Marketplace"]} /><section className="admin-card analytics-deep"><h3>New Users Over Time</h3><div className="line-chart tall"><svg viewBox="0 0 800 260" preserveAspectRatio="none"><path d="M0 220 L80 210 L160 190 L240 170 L320 180 L400 130 L480 120 L560 80 L640 70 L720 48 L800 30" fill="none" stroke="#e58a2b" strokeWidth="5"/></svg></div></section><section className="admin-metric-grid four">{[["Total Users", "5,247"], ["New This Period", "428"], ["Churn Rate", "2.1%"], ["Growth Rate", "8.2%"]].map(([label, value]) => <article key={label}><span>{label}</span><strong>{value}</strong></article>)}</section></AdminShell>;
+}
+
+function AdminAuditPage() {
+  return <AdminShell><AdminPageHeader title="Audit Log" subtitle="Complete history of all moderation and administrative actions." action={<button className="admin-outline">⬇ Export CSV</button>} /><AdminFilters search="Search by user or content..." filters={["Action Type", "Admin", "Date Range"]} /><AdminDataTable columns={["Timestamp", "Admin", "Action", "Target", "Details"]} rows={[["2025-05-20 14:32", "Vikram A.", "Approved", "Startup Fundraising Playbook", "Marked as Featured Resource"], ["2025-05-20 13:08", "Sneha P.", "Rejected", "user_8821's post", "Reason: Spam"], ["2025-05-20 11:45", "Vikram A.", "Role Change", "Dr. Ravi Kumar", "Founder → SME/Expert"], ["2025-05-19 18:20", "Sneha P.", "Suspended", "user_7732", "30 days - harassment"]]} type="audit" /></AdminShell>;
+}
+
+function AdminSettingsPage() {
+  return <AdminShell><AdminPageHeader title="Platform Settings" /><section className="admin-settings-layout"><nav>{["General", "Notifications", "Feature Flags", "SEO", "Integrations"].map((item, index) => <button className={index === 0 ? "active" : ""} key={item}>{item}</button>)}</nav><div className="admin-card settings-card"><label>Platform name<input defaultValue="Mundhe Banni" /></label><label>Support email<input defaultValue="support@mundhebanni.com" /></label><label>Default timezone<select><option>Asia/Kolkata</option></select></label><label className="admin-switch"><input type="checkbox" />Maintenance mode</label><h3>Integrations</h3><p>🟢 Discourse connected · https://mundebanni-community.discourse.group</p><button className="admin-outline">Test Connection</button></div></section></AdminShell>;
+}
+
+function AdminBannersPage() {
+  return <AdminShell><AdminPageHeader title="Banners & Featured Content" subtitle="Manage promotional banners and featured content slots across the platform." /><section className="admin-banner-grid">{["Homepage Hero Banner", "Featured Resource", "Featured Provider", "Site-wide Announcement Bar"].map((title) => <article className="admin-card" key={title}><h3>{title}</h3><p>Current slot preview and controls for platform admins.</p><button className="admin-outline">Edit</button></article>)}</section></AdminShell>;
+}
+
+function AdminApp() {
+  const pathname = window.location.pathname;
+  if (pathname === "/admin/moderation") return <AdminModerationPage />;
+  if (pathname === "/admin/resources") return <AdminGenericTablePage type="resources" title="Resource Approvals" />;
+  if (pathname === "/admin/providers") return <AdminGenericTablePage type="providers" title="Service Provider Approvals" />;
+  if (pathname === "/admin/groups") return <AdminGenericTablePage type="groups" title="Group Management" />;
+  if (pathname === "/admin/roles") return <AdminGenericTablePage type="roles" title="Role Upgrade Requests" />;
+  if (pathname === "/admin/users") return <AdminGenericTablePage type="users" title="User Management" />;
+  if (pathname === "/admin/events") return <AdminGenericTablePage type="events" title="Event Management" />;
+  if (pathname === "/admin/taxonomy") return <AdminTaxonomyPage />;
+  if (pathname === "/admin/analytics") return <AdminAnalyticsPage />;
+  if (pathname === "/admin/audit-log") return <AdminAuditPage />;
+  if (pathname === "/admin/settings") return <AdminSettingsPage />;
+  if (pathname === "/admin/banners") return <AdminBannersPage />;
+  return <AdminDashboard />;
+}
+
 function Cta() {
-  return <section className="cta"><Users size={58} /><div><h2>Be a part of Karnataka's most active founder network.</h2><p>Connect, collaborate and grow together.</p></div><a className="button primary" href="#join">Join Community</a></section>;
+  return <section className="cta"><Users size={58} /><div><h2>Be a part of Karnataka's most active founder network.</h2><p>Connect, collaborate and grow together.</p></div><a className="button primary" href="/community">Join Community</a></section>;
 }
 
 function Footer() {
@@ -1243,10 +1732,12 @@ function Footer() {
 }
 
 function HomePage() {
-  return <><Header /><main><Hero /><Stats /><EventCards /><CommunityPulse /><Groups /><Providers /><Resources /><Cta /></main><Footer /><a className="sticky-join" href="#join">Join Community</a></>;
+  return <><Header /><main><Hero /><Stats /><EventCards /><CommunityPulse /><Groups /><Providers /><Resources /><Cta /></main><Footer /><a className="sticky-join" href="/community">Join Community</a></>;
 }
 
 function App() {
+  if (window.location.pathname.startsWith("/admin")) return <AdminApp />;
+  if (window.location.pathname === "/community") return <CommunityPage />;
   if (window.location.pathname === "/my-profile") return <MyProfilePage />;
   if (window.location.pathname === "/people") return <PeoplePage />;
   if (window.location.pathname === "/groups/create") return <CreateGroupPage />;
