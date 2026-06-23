@@ -1,5 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { isSupabaseConfigured, supabase } from "./lib/supabase";
 import {
   ArrowUpRight,
   Bell,
@@ -112,6 +114,15 @@ function AvatarStack({ count }) {
 
 function Header() {
   const pathname = window.location.pathname;
+  const { user, profile, loading, signOut } = useAuth();
+  const [accountOpen, setAccountOpen] = React.useState(false);
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "Member";
+  const initial = displayName.charAt(0).toUpperCase();
+  const logout = async () => {
+    await signOut();
+    setAccountOpen(false);
+    if (window.location.pathname === "/my-profile") window.location.assign("/");
+  };
   return (
     <header className="site-header">
       <Logo />
@@ -125,7 +136,9 @@ function Header() {
       <div className="nav-actions">
         <button aria-label="Search"><Search size={22} /></button>
         <button className="bell" aria-label="Notifications"><Bell size={21} /><span>5</span></button>
-        <a className="profile" href="/my-profile" aria-label="Open my profile">A</a>
+        {!loading && !user && <a className="auth-login" href="/login">Log In</a>}
+        {!loading && user && <div className="auth-account"><button className="auth-avatar" onClick={() => setAccountOpen((open) => !open)} aria-label="Open account menu">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}</button>{accountOpen && <div className="auth-menu"><strong>{displayName}</strong><small>{user.email}</small><a href="/my-profile">My Profile</a><button onClick={logout}>Log Out</button></div>}</div>}
+        {loading && <span className="auth-loading"></span>}
         <button className="language">A~ <ChevronDown size={14} /></button>
         <button className="mobile-menu" aria-label="Open menu"><Menu /></button>
       </div>
@@ -167,39 +180,30 @@ const typeIcons = {
 };
 
 const roleMeta = {
-  Founder: { className: "founder", icon: "R", color: "#2456A0" },
-  Expert: { className: "expert", icon: "✓", color: "#1A7A4A" },
-  "Service Provider": { className: "service-provider", icon: "B", color: "#9B3BB5" },
-  Moderator: { className: "moderator", icon: "M", color: "#B8760A" }
+  founder: { label: "Founder", className: "founder", icon: "R", color: "#2456A0" },
+  sme: { label: "Expert", className: "expert", icon: "✓", color: "#1A7A4A" },
+  expert: { label: "Expert", className: "expert", icon: "✓", color: "#1A7A4A" },
+  service_provider: { label: "Service Provider", className: "service-provider", icon: "B", color: "#9B3BB5" },
+  moderator: { label: "Moderator", className: "moderator", icon: "M", color: "#B8760A" },
+  admin: { label: "Admin", className: "admin", icon: "A", color: "#C84B2F" }
 };
 
-const memberSpotlight = [
-  ["Vikram Anand", "Founder", "Bengaluru", 842, 4],
-  ["Dr. Ravi Kumar", "Expert", "Mysuru", 1240, 5],
-  ["Sneha Patil", "Founder", "Bengaluru", 621, 4],
-  ["Ananya Krishnan", "Service Provider", "Bengaluru", 540, 3],
-  ["Rohit Shenoy", "Expert", "Mangaluru", 980, 4]
-];
-
-const peopleDirectory = [
-  ["Vikram Anand", "Founder", "Founder @ NovaPay", "Bengaluru", ["Fintech", "SaaS"], 842, 4],
-  ["Dr. Ravi Kumar", "Expert", "Legal · LegalEdge Associates", "Mysuru", ["Legal", "Compliance"], 1240, 5],
-  ["Sneha Patil", "Founder", "Co-Founder @ AgriStack", "Bengaluru", ["Agritech", "Operations"], 621, 4],
-  ["Ananya Krishnan", "Service Provider", "CEO · GrowthHackers", "Bengaluru", ["Marketing", "SaaS"], 540, 3],
-  ["Rohit Shenoy", "Expert", "CFO Advisory · FinTax", "Mangaluru", ["Finance", "Fundraising"], 980, 4],
-  ["Meera Shetty", "Founder", "Founder @ EduBridge", "Bengaluru", ["Edtech", "Product"], 312, 2],
-  ["Karthik Rao", "Founder", "CTO @ HealthNest", "Bengaluru", ["Healthcare", "Technology"], 187, 2],
-  ["Priya Kamath", "Moderator", "Founder @ LogiRoute", "Bengaluru", ["Logistics", "Operations"], 724, 4],
-  ["Arun Hegde", "Expert", "Partner · StartupCounsel India", "Bengaluru", ["Legal", "Fundraising"], 1102, 5],
-  ["Divya Nair", "Founder", "Founder @ CleanHarvest", "Hubballi", ["Agritech", "D2C"], 445, 3],
-  ["Siddharth Bhat", "Founder", "Co-Founder @ DataVerse", "Bengaluru", ["SaaS", "Technology"], 268, 2],
-  ["Kavitha Murthy", "Service Provider", "HR · TalentFirst", "Bengaluru", ["HR", "Recruitment"], 398, 3]
-];
-
-const levelProgress = (xp, level) => {
-  const ranges = { 1: [0, 199], 2: [200, 499], 3: [500, 999], 4: [500, 999], 5: [1000, 2000] };
-  const [start, end] = ranges[level] || [0, 1000];
-  return Math.min(100, Math.max(18, ((xp - start) / (end - start)) * 100));
+const normalizeRole = (role = "founder") => role.toLowerCase().replaceAll(" ", "_");
+const getRoleMeta = (role) => roleMeta[normalizeRole(role)] || roleMeta.founder;
+const getXpLevel = (xpValue = 0) => {
+  const xp = Number(xpValue) || 0;
+  if (xp >= 2000) return 5;
+  if (xp >= 1000) return 4;
+  if (xp >= 500) return 3;
+  if (xp >= 200) return 2;
+  return 1;
+};
+const levelProgress = (xpValue, level = getXpLevel(xpValue)) => {
+  const xp = Number(xpValue) || 0;
+  const ranges = { 1: [0, 200], 2: [200, 500], 3: [500, 1000], 4: [1000, 2000], 5: [2000, 2000] };
+  const [start, end] = ranges[level] || ranges[1];
+  if (level === 5) return 100;
+  return Math.min(100, Math.max(0, ((xp - start) / (end - start)) * 100));
 };
 
 const discourseBaseUrl = "https://mundebanni-community.discourse.group";
@@ -471,7 +475,153 @@ function UploadSection({ title, children }) {
   return <fieldset><legend>{title}</legend>{children}</fieldset>;
 }
 
-function PeopleHeader() {
+function LoginPage() {
+  const { user, profile, loading, configured } = useAuth();
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState(null);
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const describeLoginError = (loginError) => {
+    const code = loginError?.code || "unknown";
+    const status = loginError?.status;
+    const rawMessage = typeof loginError?.message === "string" ? loginError.message : "";
+    const messages = {
+      invalid_credentials: "Invalid email or password. Confirm that this email exists in Supabase Auth and that its password was set correctly.",
+      email_not_confirmed: "This email address has not been confirmed in Supabase Auth.",
+      user_banned: "This account is currently suspended.",
+      validation_failed: "Enter a valid email address and password.",
+      unexpected_failure: "Supabase could not complete the login request. Check the Auth logs for this account."
+    };
+    return {
+      message: messages[code] || (rawMessage && rawMessage !== "{}" ? rawMessage : "Login failed. Supabase returned an empty error response."),
+      detail: `Error code: ${code}${status ? ` · HTTP ${status}` : ""}`
+    };
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setError(null);
+    if (!configured || !supabase) {
+      setError({ message: "Supabase is not configured for this environment.", detail: "Error code: client_not_configured" });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (loginError) {
+        console.error("Supabase login failed", { code: loginError.code, status: loginError.status, message: loginError.message });
+        setError(describeLoginError(loginError));
+        return;
+      }
+      window.location.assign("/people");
+    } catch (loginError) {
+      console.error("Supabase login request failed", { name: loginError?.name, message: loginError?.message });
+      setError({ message: "Could not reach Supabase Auth. Check your connection and try again.", detail: `Error code: ${loginError?.name || "network_error"}` });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return <><Header /><main className="login-page"><section className="login-panel"><Logo /><div><span>Admin testing access</span><h1>Welcome back</h1><p>Log in with your Mundhe Banni admin account.</p></div>{!loading && user ? <div className="already-signed-in"><strong>You're signed in as {profile?.display_name || user.email}.</strong><a className="button primary" href="/people">Continue to People</a></div> : <form onSubmit={submit}><label>Email address<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required /></label>{error && <div className="login-error" role="alert"><strong>{error.message}</strong><small>{error.detail}</small></div>}<button type="submit" disabled={submitting}>{submitting ? "Logging In..." : "Log In"}</button></form>}</section><aside className="login-context"><div><h2>Build Karnataka's founder network, together.</h2><p>Access member profiles, community conversations, events, and admin tools with one account.</p><div><span>5,200+</span><small>Founder connections</small></div></div></aside></main></>;
+}
+
+const PEOPLE_PAGE_SIZE = 20;
+
+const getMemberCity = (member) => {
+  const city = Array.isArray(member?.cities) ? member.cities[0] : member?.cities;
+  return city?.name || "Karnataka";
+};
+
+const getMemberInterests = (member) => (member?.profile_interests || [])
+  .map((item) => item?.interest_tags?.label || item?.interest_tags?.name)
+  .filter(Boolean);
+
+async function queryMembers(page) {
+  const from = (page - 1) * PEOPLE_PAGE_SIZE;
+  const to = from + PEOPLE_PAGE_SIZE - 1;
+  const columns = `
+    id, username, display_name, role, bio, avatar_url, xp_points,
+    profile_visibility, account_status, onboarding_completed,
+    cities ( name ),
+    profile_interests ( interest_tags ( label ) )
+  `;
+  let result = await supabase
+    .from("profiles")
+    .select(columns, { count: "exact" })
+    .eq("profile_visibility", "public")
+    .eq("account_status", "active")
+    .is("deleted_at", null)
+    .order("xp_points", { ascending: false })
+    .range(from, to);
+
+  if (result.error && ["PGRST200", "PGRST201"].includes(result.error.code)) {
+    result = await supabase
+      .from("profiles")
+      .select("id, username, display_name, role, bio, avatar_url, xp_points, profile_visibility, account_status, onboarding_completed", { count: "exact" })
+      .eq("profile_visibility", "public")
+      .eq("account_status", "active")
+      .is("deleted_at", null)
+      .order("xp_points", { ascending: false })
+      .range(from, to);
+  }
+  return result;
+}
+
+function usePeopleData(page, reloadKey) {
+  const [state, setState] = React.useState({ members: [], stats: null, roleCounts: {}, total: 0, loading: true, error: null });
+
+  React.useEffect(() => {
+    let cancelled = false;
+    if (!isSupabaseConfigured || !supabase) {
+      setState({ members: [], stats: null, roleCounts: {}, total: 0, loading: false, error: new Error("Supabase environment variables are not configured.") });
+      return undefined;
+    }
+
+    setState((current) => ({ ...current, loading: true, error: null }));
+    Promise.all([
+      queryMembers(page),
+      supabase
+        .from("profiles")
+        .select("role")
+        .eq("profile_visibility", "public")
+        .eq("account_status", "active")
+        .is("deleted_at", null),
+      supabase.from("platform_stats").select("*").single()
+    ]).then(([memberResult, rolesResult, statsResult]) => {
+      if (cancelled) return;
+      if (memberResult.error) throw memberResult.error;
+
+      const roleCounts = (rolesResult.data || []).reduce((counts, profile) => {
+        const role = normalizeRole(profile.role);
+        counts[role] = (counts[role] || 0) + 1;
+        return counts;
+      }, {});
+      setState({
+        members: memberResult.data || [],
+        stats: statsResult.data || null,
+        roleCounts,
+        total: memberResult.count ?? memberResult.data?.length ?? 0,
+        loading: false,
+        error: null
+      });
+    }).catch((error) => {
+      if (!cancelled) setState({ members: [], stats: null, roleCounts: {}, total: 0, loading: false, error });
+    });
+
+    return () => { cancelled = true; };
+  }, [page, reloadKey]);
+
+  return state;
+}
+
+function PeopleHeader({ stats, roleCounts, loading }) {
+  const values = [
+    [stats?.total_founders ?? roleCounts.founder ?? 0, "Founders"],
+    [stats?.total_experts ?? ((roleCounts.sme || 0) + (roleCounts.expert || 0)), "Experts & Mentors"],
+    [stats?.total_providers ?? roleCounts.service_provider ?? 0, "Service Providers"],
+    [stats?.total_active_groups ?? 0, "Active Groups"]
+  ];
   return (
     <section className="people-header">
       <Breadcrumb items={["People"]} />
@@ -481,42 +631,39 @@ function PeopleHeader() {
           <p>Discover founders, experts, mentors, and service providers building Karnataka's startup ecosystem.</p>
         </div>
         <div className="people-header-stats">
-          {[
-            ["5,200+", "Founders"],
-            ["320+", "Experts & Mentors"],
-            ["140+", "Service Providers"],
-            ["82+", "Active Groups"]
-          ].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
+          {values.map(([value, label]) => <div key={label}>{loading ? <i className="people-stat-skeleton"></i> : <strong>{value}</strong>}<span>{label}</span></div>)}
         </div>
       </div>
     </section>
   );
 }
 
-function MemberAvatar({ name, role, size = "regular" }) {
-  const meta = roleMeta[role] || roleMeta.Founder;
+function MemberAvatar({ name, role, avatarUrl, size = "regular" }) {
+  const meta = getRoleMeta(role);
   return (
     <span className={`member-avatar ${size} ${meta.className}`}>
-      <strong>{name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</strong>
+      {avatarUrl ? <img src={avatarUrl} alt="" /> : <strong>{(name || "Member").split(" ").map((part) => part[0]).join("").slice(0, 2)}</strong>}
       <i>{meta.icon}</i>
     </span>
   );
 }
 
 function RoleBadge({ role }) {
-  const meta = roleMeta[role] || roleMeta.Founder;
-  return <small className={`role-badge ${meta.className}`}>{role}</small>;
+  const meta = getRoleMeta(role);
+  return <small className={`role-badge ${meta.className}`}>{meta.label}</small>;
 }
 
 function SpotlightCard({ member }) {
-  const [name, role, city, xp, level] = member;
+  const name = member.display_name || member.username || "Community Member";
+  const xp = Number(member.xp_points) || 0;
+  const level = getXpLevel(xp);
   const [followed, setFollowed] = React.useState(false);
   return (
     <article className="spotlight-card">
-      <MemberAvatar name={name} role={role} size="large" />
+      <MemberAvatar name={name} role={member.role} avatarUrl={member.avatar_url} size="large" />
       <h3>{name}</h3>
-      <RoleBadge role={role} />
-      <p>📍 {city}</p>
+      <RoleBadge role={member.role} />
+      <p>📍 {getMemberCity(member)}</p>
       <div className="xp-meter"><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div>
       <em>★ {xp.toLocaleString()} XP · Level {level}</em>
       <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>
@@ -524,25 +671,33 @@ function SpotlightCard({ member }) {
   );
 }
 
-function MemberSpotlight() {
+function MemberSpotlight({ members }) {
   return (
     <section className="member-spotlight">
       <div className="spotlight-head">
         <div><h2>★ Member Spotlight</h2><p>Top contributors and recently active members</p></div>
         <div><button aria-label="Previous spotlight">‹</button><button aria-label="Next spotlight">›</button></div>
       </div>
-      <div className="spotlight-row">{memberSpotlight.map((member) => <SpotlightCard key={member[0]} member={member} />)}</div>
+      <div className="spotlight-row">{members.slice(0, 5).map((member) => <SpotlightCard key={member.id} member={member} />)}</div>
     </section>
   );
 }
 
-function PeopleToolbar() {
+function PeopleToolbar({ total, roleCounts, query, onQuery, roleFilter, onRoleFilter }) {
+  const pills = [
+    ["All Members", total, "all", "all"],
+    ["Founders", roleCounts.founder || 0, "founder", "founder"],
+    ["Experts & SMEs", (roleCounts.sme || 0) + (roleCounts.expert || 0), "expert", "sme"],
+    ["Service Providers", roleCounts.service_provider || 0, "service-provider", "service_provider"],
+    ["Moderators", roleCounts.moderator || 0, "moderator", "moderator"],
+    ["Admins", roleCounts.admin || 0, "admin", "admin"]
+  ];
   return (
     <>
       <section className="people-toolbar">
-        <div className="resource-search"><Search size={16} /><input placeholder="Search by name, expertise, or company..." /></div>
+        <div className="resource-search"><Search size={16} /><input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search by name, expertise, or bio..." /></div>
         {[
-          ["Role:", ["All Roles", "Founder", "Expert / SME", "Service Provider", "Moderator"]],
+          ["Role:", ["All Roles", "Founder", "Expert / SME", "Service Provider", "Moderator", "Admin"]],
           ["City:", ["All Cities", "Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi"]],
           ["Expertise:", ["All Areas", "SaaS", "Fintech", "Agritech", "Edtech", "Healthcare", "Legal", "Finance", "Marketing", "Technology", "Operations"]],
           ["Sort:", ["Most Active", "Newest Members", "Top XP", "A-Z"]]
@@ -551,122 +706,142 @@ function PeopleToolbar() {
         ))}
         <button className="mobile-filter"><Filter size={16} />Filter & Sort</button>
         <div className="view-toggle"><button className="active" aria-label="Grid view"><Grid3X3 size={17} /></button><button aria-label="List view"><List size={18} /></button></div>
-        <p>Showing 5,200 members</p>
+        <p>Showing {total} {total === 1 ? "member" : "members"}</p>
       </section>
       <section className="role-pill-row">
-        {[
-          ["All Members", "5,200", "all"],
-          ["Founders", "4,720", "founder"],
-          ["Experts & SMEs", "320", "expert"],
-          ["Service Providers", "140", "service-provider"],
-          ["Moderators", "20", "moderator"]
-        ].map(([label, count, tone], index) => <button className={`${tone} ${index === 0 ? "active" : ""}`} key={label}>{label} ({count})</button>)}
+        {pills.map(([label, count, tone, value]) => <button className={`${tone} ${roleFilter === value ? "active" : ""}`} onClick={() => onRoleFilter(value)} key={label}>{label} ({count})</button>)}
       </section>
     </>
   );
 }
 
-function PersonCard({ person }) {
-  const [name, role, company, city, tags, xp, level] = person;
+function PersonCard({ person, isOwnProfile = false }) {
+  const name = person.display_name || person.username || "Community Member";
+  const tags = getMemberInterests(person);
+  const visibleTags = tags.slice(0, 2);
+  const xp = Number(person.xp_points) || 0;
+  const level = getXpLevel(xp);
   const [followed, setFollowed] = React.useState(false);
-  const meta = roleMeta[role] || roleMeta.Founder;
+  const meta = getRoleMeta(person.role);
   return (
     <article className={`person-card ${meta.className}`}>
       <div className="person-cover"></div>
       <div className="person-card-body">
-        <MemberAvatar name={name} role={role} />
+        <MemberAvatar name={name} role={person.role} avatarUrl={person.avatar_url} />
         <h3>{name}</h3>
-        <RoleBadge role={role} />
-        <p className="person-company">{company}</p>
-        <p className="person-city">📍 {city}</p>
-        <div className="person-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+        <RoleBadge role={person.role} />
+        <p className="person-company">{person.bio || `@${person.username || "member"}`}</p>
+        <p className="person-city">📍 {getMemberCity(person)}</p>
+        <div className="person-tags">{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tags.length > 2 && <span>+{tags.length - 2}</span>}{tags.length === 0 && <span>New member</span>}</div>
         <div className={`xp-strip level-${level}`}>
           <div><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div>
           <p><span>★ {xp.toLocaleString()} XP</span><span>Level {level}</span></p>
         </div>
       </div>
       <div className="person-actions">
-        <a href="/my-profile">View Profile</a>
-        <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>
+        <a href={isOwnProfile ? "/my-profile" : `/people/${person.username || person.id}`}>{isOwnProfile ? "My Profile" : "View Profile"}</a>
+        {!isOwnProfile && <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>}
       </div>
     </article>
   );
 }
 
 function PeoplePage() {
+  const { user } = useAuth();
+  const [page, setPage] = React.useState(1);
+  const [reloadKey, setReloadKey] = React.useState(0);
+  const [query, setQuery] = React.useState("");
+  const [roleFilter, setRoleFilter] = React.useState("all");
+  const [inviteOpen, setInviteOpen] = React.useState(false);
+  const { members, stats, roleCounts, total, loading, error } = usePeopleData(page, reloadKey);
+  const filteredMembers = members.filter((member) => {
+    const role = normalizeRole(member.role);
+    const matchesRole = roleFilter === "all" || role === roleFilter || (roleFilter === "sme" && role === "expert");
+    const haystack = `${member.display_name || ""} ${member.username || ""} ${member.bio || ""} ${getMemberCity(member)} ${getMemberInterests(member).join(" ")}`.toLowerCase();
+    return matchesRole && haystack.includes(query.trim().toLowerCase());
+  });
+  const totalPages = Math.max(1, Math.ceil(total / PEOPLE_PAGE_SIZE));
+  const showEmptyState = !loading && !error && total <= 1;
+  const ownMember = members.find((member) => member.id === user?.id) || members[0];
+
   return (
     <>
       <Header />
       <main>
-        <PeopleHeader />
-        <MemberSpotlight />
-        <PeopleToolbar />
-        <section className="people-grid">
-          {peopleDirectory.map((person) => <PersonCard key={person[0]} person={person} />)}
-        </section>
-        <nav className="pagination people-pagination" aria-label="People pagination">{["‹", "1", "2", "3", "...", "52", "›"].map((item) => <button className={item === "1" ? "active" : ""} key={item}>{item}</button>)}</nav>
+        <PeopleHeader stats={stats} roleCounts={roleCounts} loading={loading} />
+        {!loading && !error && members.length >= 3 && <MemberSpotlight members={members} />}
+        <PeopleToolbar total={total} roleCounts={roleCounts} query={query} onQuery={setQuery} roleFilter={roleFilter} onRoleFilter={setRoleFilter} />
+        {loading && <PeopleLoadingState />}
+        {error && <PeopleErrorState error={error} onRetry={() => setReloadKey((key) => key + 1)} />}
+        {showEmptyState && <PeopleEmptyState member={ownMember} user={user} onInvite={() => setInviteOpen(true)} />}
+        {!loading && !error && !showEmptyState && <section className="people-grid">{filteredMembers.map((person) => <PersonCard key={person.id} person={person} isOwnProfile={person.id === user?.id} />)}{filteredMembers.length === 0 && <p className="people-no-results">No members match these filters.</p>}</section>}
+        {!loading && !error && !showEmptyState && totalPages > 1 && <nav className="pagination people-pagination" aria-label="People pagination"><button disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>‹</button>{Array.from({ length: totalPages }, (_, index) => index + 1).slice(0, 7).map((number) => <button className={number === page ? "active" : ""} onClick={() => setPage(number)} key={number}>{number}</button>)}<button disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>›</button></nav>}
       </main>
       <Footer />
+      {inviteOpen && <InviteFoundersModal onClose={() => setInviteOpen(false)} />}
     </>
   );
 }
 
+function PeopleLoadingState() {
+  return <section className="people-grid people-loading" aria-label="Loading members">{Array.from({ length: 8 }, (_, index) => <article className="person-card" key={index}><div className="person-cover"></div><div className="people-card-skeleton"><i></i><span></span><span></span><span></span></div></article>)}</section>;
+}
+
+function PeopleErrorState({ error, onRetry }) {
+  const schemaError = error?.code === "PGRST106" || error?.message?.includes("Invalid schema");
+  return <section className="people-error"><strong>Could not load community members.</strong><p>{schemaError ? "The mundhe_banni schema must be added to Supabase API exposed schemas." : error?.message || "Check the Supabase connection and try again."}</p><button onClick={onRetry}>Try Again</button></section>;
+}
+
+function PeopleEmptyState({ member, user, onInvite }) {
+  return <section className="people-empty"><div><i>👥</i><h2>You're the first member here</h2><p>Invite founders to join the Mundhe Banni community.</p><button onClick={onInvite}>Invite Founders</button></div>{member && <aside><h3>Here's your profile so far:</h3><PersonCard person={member} isOwnProfile={Boolean(user && member.id === user.id)} /></aside>}</section>;
+}
+
+function InviteFoundersModal({ onClose }) {
+  const [copied, setCopied] = React.useState(false);
+  const inviteUrl = `${window.location.origin}/people`;
+  const copyInvite = async () => {
+    await navigator.clipboard.writeText(inviteUrl);
+    setCopied(true);
+  };
+  return <div className="modal-overlay"><div className="invite-founders-modal"><button className="modal-close" onClick={onClose}><X /></button><h2>Invite Founders</h2><p>Share this link with founders you want to welcome into Mundhe Banni.</p><div><input readOnly value={inviteUrl} /><button onClick={copyInvite}>{copied ? "Copied" : "Copy Link"}</button></div></div></div>;
+}
+
+function useMyProfileSupplement(userId) {
+  const [state, setState] = React.useState({ groups: "—", events: "—", interests: [], loading: false });
+  React.useEffect(() => {
+    if (!userId || !supabase) return undefined;
+    let cancelled = false;
+    setState((current) => ({ ...current, loading: true }));
+    Promise.all([
+      supabase.from("group_members").select("*", { count: "exact", head: true }).eq("profile_id", userId),
+      supabase.from("event_rsvps").select("*, events!inner(status)", { count: "exact", head: true }).eq("profile_id", userId).eq("rsvp_status", "going").eq("events.status", "completed"),
+      supabase.from("profile_interests").select("interest_tags ( label )").eq("profile_id", userId)
+    ]).then(([groupsResult, eventsResult, interestsResult]) => {
+      if (cancelled) return;
+      setState({ groups: groupsResult.error ? "—" : groupsResult.count ?? 0, events: eventsResult.error ? "—" : eventsResult.count ?? 0, interests: (interestsResult.data || []).map((item) => item.interest_tags?.label).filter(Boolean), loading: false });
+    });
+    return () => { cancelled = true; };
+  }, [userId]);
+  return state;
+}
+
 function MyProfilePage() {
-  return (
-    <>
-      <Header />
-      <main className="my-profile-page">
-        <section className="profile-cover">
-          <button>Edit Cover</button>
-        </section>
-        <section className="profile-intro">
-          <MemberAvatar name="Vikram Anand" role="Founder" size="profile" />
-          <div className="profile-info-row">
-            <div>
-              <h1>Vikram Anand <RoleBadge role="Founder" /></h1>
-              <p className="username">@vikramanand</p>
-              <p>Building NovaPay for small business collections across Bharat. Active in fintech, SaaS GTM, and founder fundraising conversations.</p>
-              <div className="profile-meta"><span>📍 Bengaluru, Karnataka</span><a href="#site">novapay.in</a><a href="#linkedin">LinkedIn</a><span>Joined January 2024</span></div>
-            </div>
-            <aside className="completion-card">
-              <h2>Profile Completion</h2>
-              <div className="completion-ring"><span>70%</span></div>
-              <p>Add your LinkedIn to reach 85%</p>
-              <a href="#complete">Complete Profile →</a>
-            </aside>
-          </div>
-        </section>
-        <section className="profile-stats">{[["48", "Discussions"], ["312", "Replies"], ["5", "Groups"], ["8", "Events Attended"], ["842", "XP Points"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</section>
-        <section className="profile-xp">
-          <div><strong>★ Level 4 - Top Contributor</strong><div className="xp-meter wide"><span style={{ width: "72%" }}></span></div><small>842 / 1000 XP to Level 5</small></div>
-          <div className="badge-strip"><strong>Badges</strong>{["Top Contributor", "Best Answer x12", "Event Speaker", "Resource Author"].map((badge) => <span key={badge}>{badge}</span>)}</div>
-        </section>
-        <section className="profile-actions"><button>Edit Profile</button><button>Settings</button><button>Share Profile</button></section>
-        <nav className="profile-tabs">{["Feed", "Contributions", "Groups", "Events", "Settings"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab}>{tab}</button>)}</nav>
-        <section className="profile-feed-layout">
-          <div className="activity-feed">
-            <h2>Recent Activity</h2>
-            {[
-              ["💬", "Started a discussion:", "How SaaS founders navigate sales in 2025", "2 hours ago", "+10 XP"],
-              ["✓", "Received Best Answer on:", "Best approach for pre-seed fundraising", "1 day ago", "+25 XP"],
-              ["📅", "RSVPd Going to:", "Bengaluru Founder Meetup - May 24", "2 days ago", "+5 XP"],
-              ["👥", "Joined group:", "Fintech Builders", "1 week ago", "+5 XP"],
-              ["📄", "Uploaded resource:", "Startup Legal Checklist 2025", "2 weeks ago", "+20 XP"]
-            ].map(([icon, action, title, time, xp]) => (
-              <article key={title}><i>{icon}</i><div><p>{action} <a href="#activity">{title}</a></p><small>{time}</small><em>{xp}</em></div></article>
-            ))}
-            <a className="load-more-link" href="#more">Load More Activity →</a>
-          </div>
-          <aside className="profile-sidebar">
-            <ProfileWidget title="Interests">{["SaaS", "Fintech", "Fundraising", "Product", "Legal"].map((tag) => <span key={tag}>{tag}</span>)}</ProfileWidget>
-            <ProfileWidget title="My Groups (5)">{["Bengaluru Founders", "Fintech Builders", "Startup Funding"].map((group) => <p key={group}><strong>{group}</strong><small>Active</small></p>)}</ProfileWidget>
-            <ProfileWidget title="Community Leaderboard"><h3>#12 in Karnataka</h3><p>Top 1% of all members</p><p><strong>Vikram Anand</strong><small>842 XP</small></p></ProfileWidget>
-          </aside>
-        </section>
-      </main>
-      <Footer />
-    </>
-  );
+  const { user, profile, loading, profileLoading } = useAuth();
+  const supplement = useMyProfileSupplement(user?.id);
+  if (loading || profileLoading) return <><Header /><main className="my-profile-page"><div className="profile-page-loading">Loading your profile...</div></main></>;
+  if (!user) return <><Header /><main className="profile-signed-out"><Lock size={34} /><h1>Log in to view your profile</h1><p>Your profile is connected to your Mundhe Banni account.</p><a className="button primary" href="/login">Log In</a></main><Footer /></>;
+  if (!profile) return <><Header /><main className="profile-signed-out"><h1>Profile unavailable</h1><p>We could not load the profile connected to {user.email}.</p><a className="button secondary" href="/people">Back to People</a></main><Footer /></>;
+
+  const name = profile.display_name || profile.username || user.email;
+  const xp = Number(profile.xp_points) || 0;
+  const level = getXpLevel(xp);
+  const nextThreshold = { 1: 200, 2: 500, 3: 1000, 4: 2000, 5: 2000 }[level];
+  const city = getMemberCity(profile);
+  const completionFields = [profile.display_name, profile.username, profile.bio, profile.avatar_url, profile.website_url, profile.linkedin_url];
+  const completion = Math.round((completionFields.filter(Boolean).length / completionFields.length) * 100);
+  const joined = profile.created_at ? new Date(profile.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Recently";
+
+  return <><Header /><main className="my-profile-page"><section className="profile-cover"><button>Edit Cover</button></section><section className="profile-intro"><MemberAvatar name={name} role={profile.role} avatarUrl={profile.avatar_url} size="profile" /><div className="profile-info-row"><div><h1>{name} <RoleBadge role={profile.role} /></h1><p className="username">@{profile.username || "member"}</p><p>{profile.bio || "This member has not added a bio yet."}</p><div className="profile-meta"><span>📍 {city}</span>{profile.website_url && <a href={profile.website_url}>Website</a>}{profile.linkedin_url && <a href={profile.linkedin_url}>LinkedIn</a>}<span>Joined {joined}</span></div></div><aside className="completion-card"><h2>Profile Completion</h2><div className="completion-ring" style={{ background: `conic-gradient(var(--accent) 0 ${completion}%, var(--line) ${completion}% 100%)` }}><span>{completion}%</span></div><p>{completion === 100 ? "Your profile is complete." : "Add more profile details to help members connect."}</p></aside></div></section><section className="profile-stats">{[["—", "Discussions"], ["—", "Replies"], [supplement.groups, "Groups"], [supplement.events, "Events Attended"], [xp.toLocaleString(), "XP Points"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</section><section className="profile-xp"><div><strong>★ Level {level}{level === 5 ? " - Top Contributor" : ""}</strong><div className="xp-meter wide"><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div><small>{level === 5 ? `${xp.toLocaleString()} XP` : `${xp.toLocaleString()} / ${nextThreshold.toLocaleString()} XP to Level ${level + 1}`}</small></div></section><section className="profile-actions"><button>Edit Profile</button><button>Settings</button><button>Share Profile</button></section><nav className="profile-tabs"><button className="active">Profile</button><button>Groups</button><button>Events</button><button>Settings</button></nav><section className="profile-feed-layout"><div className="profile-real-content"><h2>About</h2><p>{profile.bio || "Add a bio to tell the community what you're building and where you can help."}</p><div className="profile-coming-soon"><MessageCircle size={24} /><div><strong>Discourse activity coming soon</strong><p>Discussions and replies will appear after profile-to-Discourse SSO mapping is connected.</p></div></div></div><aside className="profile-sidebar"><ProfileWidget title={`Interests (${supplement.interests.length})`}>{supplement.interests.length ? supplement.interests.map((tag) => <span key={tag}>{tag}</span>) : <p>No interests added yet.</p>}</ProfileWidget><ProfileWidget title="Account"><p><strong>Email</strong><small>{user.email}</small></p><p><strong>Role</strong><small>{getRoleMeta(profile.role).label}</small></p></ProfileWidget></aside></section></main><Footer /></>;
 }
 
 function ProfileWidget({ title, children }) {
@@ -1089,61 +1264,249 @@ function CreateEventPage() {
   );
 }
 
-const groupsDirectory = [
-  ["Founder / General", "Bengaluru Founders", "Public", "🔥 Active", "Bengaluru", "Bengaluru's largest founder community for early and growth-stage startups.", "1.2K", "2h ago", 48, "Joined", "#2456A0", "🏙️"],
-  ["Agritech", "Agritech Karnataka", "Public", "🔥 Active", "Bengaluru", "Building the future of farming and rural commerce across Karnataka.", "860", "5h ago", 21, "Join Group", "#1A7A4A", "🌿"],
-  ["Fintech", "Fintech Builders", "Public", "🔥 Active", "Bengaluru", "Fintech founders, product managers, and engineers building financial products.", "1.1K", "1h ago", 32, "Join Group", "#374151", "💰"],
-  ["Women Founders", "Women Entrepreneurs", "Public", "🔥 Active", "Karnataka", "A safe, supportive space for women building businesses across Karnataka.", "950", "3h ago", 28, "Join Group", "#9B3BB5", "👩"],
-  ["SaaS / Tech", "SaaS Builders Karnataka", "Public", "Active", "Bengaluru", "Product founders and engineers building SaaS for global and Indian markets.", "840", "6h ago", 19, "Join Group", "#5B3DB5", "💻"],
-  ["Founder / General", "Mysuru Founders", "Public", "Active", "Mysuru", "Founders and early-stage entrepreneurs building from Mysuru.", "320", "1d ago", 8, "Join Group", "#2456A0", "🏙️"],
-  ["Edtech", "Edtech Karnataka", "Public", "Quiet", "Karnataka", "Founders working on education products for K-12, higher ed, and skilling.", "280", "3d ago", 5, "Join Group", "#B8760A", "📚"],
-  ["Healthcare", "HealthTech Founders", "Private", "Active", "Bengaluru", "A private community for founders building in healthcare and medtech.", "190", "8h ago", 14, "Join Group", "#C84B2F", "🏥"],
-  ["Founder / General", "Startup Legal & Finance Circle", "Invite-Only", "Active", "Karnataka", "Closed group for founders navigating fundraising, legal, and finance issues.", "145", "4h ago", 11, "Pending", "#2456A0", "⚖️"]
+const GROUPS_PAGE_SIZE = 9;
+const GROUP_COLORS = ["#2456A0", "#1A7A4A", "#374151", "#9B3BB5", "#5B3DB5", "#B8760A", "#C84B2F"];
+const GROUP_BANNERS = [
+  [["bengaluru-founders", "bengaluru founders"], "/assets/group-bengaluru-founders.png"],
+  [["ai-tech-founders", "ai tech founders", "ai founders"], "/assets/group-ai-tech-founders.png"],
+  [["saas-tech-founders", "saas tech founders", "saas founders"], "/assets/group-saas-tech-founders.png"],
+  [["agri-founders", "agri founders", "agritech"], "/assets/group-agri-founders.png"],
+  [["d2c-e-commerce-founders", "d2c/e-commerce founders", "d2c ecommerce founders", "e-commerce"], "/assets/group-d2c-ecommerce-founders.png"],
+  [["edtech-founders", "edtech founders"], "/assets/group-edtech-founders.png"]
+];
+const GROUP_ICONS = [
+  ["agri", "🌿"],
+  ["ai", "🤖"],
+  ["saas", "💻"],
+  ["d2c", "🛒"],
+  ["commerce", "🛒"],
+  ["edtech", "📚"],
+  ["fintech", "💰"],
+  ["women", "👩"],
+  ["bengaluru", "🏙️"],
+  ["founder", "🚀"]
 ];
 
-const groupClass = (value) => value.toLowerCase().replaceAll(" / ", "-").replaceAll(" ", "-");
+const groupClass = (value = "") => value.toLowerCase().replaceAll("/", "").replaceAll("&", "and").replaceAll(" ", "-").replaceAll("_", "-");
+const groupMemberCount = (group) => {
+  const relation = group?.group_members;
+  if (Array.isArray(relation)) return Number(relation[0]?.count ?? relation.length) || 0;
+  return Number(relation?.count) || 0;
+};
+const groupTags = (group) => (group?.group_interests || []).map((item) => item.interest_tags?.label || item.interest_tags?.slug).filter(Boolean);
+const groupIcon = (group) => {
+  const text = `${group?.slug || ""} ${group?.name || ""} ${group?.category || ""}`.toLowerCase();
+  return GROUP_ICONS.find(([key]) => text.includes(key))?.[1] || "👥";
+};
+const groupColor = (group) => GROUP_COLORS[Math.abs((group?.name || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0)) % GROUP_COLORS.length];
+const groupPrivacyLabel = (privacy = "public") => privacy === "invite_only" ? "Invite Only" : privacy.charAt(0).toUpperCase() + privacy.slice(1);
+const groupPrivacyIcon = (privacy = "public") => privacy === "private" ? "🔒" : privacy === "invite_only" ? "🔑" : "🔓";
+const groupLocation = (group) => group?.cities?.name || "Karnataka-wide";
+const groupBanner = (group) => {
+  if (group?.banner_url) return group.banner_url;
+  const haystack = `${group?.slug || ""} ${group?.name || ""}`.toLowerCase();
+  return GROUP_BANNERS.find(([keys]) => keys.some((key) => haystack.includes(key)))?.[1] || "/assets/founder-meetup.png";
+};
+const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-function GroupsHeader() {
-  return <section className="groups-page-header"><Breadcrumb items={["Groups"]} /><div className="groups-title-row"><div><h1>Founder Groups</h1><p>Join focused communities of Karnataka founders, operators, and builders working in the same space as you.</p></div><div className="groups-header-side"><div className="groups-header-stats"><div><strong>82+</strong><span>Active Groups</span></div><div><strong>5,200+</strong><span>Members</span></div><div><strong>340+</strong><span>Discussions This Week</span></div></div><a className="button primary" href="/groups/create">＋ Create Group</a></div></div></section>;
+function useGroupsPageData(page, reloadKey, userId) {
+  const [state, setState] = React.useState({ groups: [], stats: null, featured: null, recommended: [], trending: [], memberships: {}, total: 0, loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ groups: [], stats: null, featured: null, recommended: [], trending: [], memberships: {}, total: 0, loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    const from = (page - 1) * GROUPS_PAGE_SIZE;
+    const to = page * GROUPS_PAGE_SIZE - 1;
+    setState((current) => ({ ...current, loading: true, error: null }));
+    Promise.all([
+      supabase.from("platform_stats").select("*").single(),
+      supabase.from("groups").select("id, slug, name, short_description, banner_url, logo_url, privacy_type, status, group_members ( count )").eq("status", "active").eq("is_featured", true).limit(1).maybeSingle(),
+      supabase.from("groups").select("id, slug, name, short_description, category, city_id, privacy_type, logo_url, banner_url, status, created_at, cities ( name ), group_members ( count ), group_interests ( interest_tags ( label, slug ) )").eq("status", "active").order("created_at", { ascending: false }).limit(4),
+      supabase.from("groups").select("id, slug, name, logo_url, category, group_members ( count )").eq("status", "active").order("created_at", { ascending: false }).limit(5),
+      supabase.from("groups").select("id, slug, name, short_description, category, privacy_type, logo_url, banner_url, status, created_at, cities ( name ), group_members ( count ), group_interests ( interest_tags ( label ) )", { count: "exact" }).eq("status", "active").order("created_at", { ascending: false }).range(from, to)
+    ]).then(async ([statsResult, featuredResult, recommendedResult, trendingResult, groupsResult]) => {
+      if (cancelled) return;
+      if (groupsResult.error) throw groupsResult.error;
+      const groups = groupsResult.data || [];
+      let memberships = {};
+      if (userId && groups.length) {
+        const membershipResult = await supabase.from("group_members").select("group_id, group_role").eq("profile_id", userId).in("group_id", groups.map((group) => group.id));
+        if (!membershipResult.error) memberships = Object.fromEntries((membershipResult.data || []).map((membership) => [membership.group_id, membership.group_role]));
+      }
+      setState({
+        groups,
+        stats: statsResult.error ? null : statsResult.data,
+        featured: featuredResult.error ? null : featuredResult.data,
+        recommended: recommendedResult.error ? [] : recommendedResult.data || [],
+        trending: trendingResult.error ? [] : trendingResult.data || [],
+        memberships,
+        total: groupsResult.count ?? groups.length,
+        loading: false,
+        error: null
+      });
+    }).catch((error) => {
+      if (!cancelled) setState((current) => ({ ...current, loading: false, error }));
+    });
+    return () => { cancelled = true; };
+  }, [page, reloadKey, userId]);
+  return state;
 }
 
-function FeaturedGroupBanner() {
-  return <section className="featured-group-banner"><div><span className="featured-pill">🔥 Featured Group of the Week</span><h2>Bengaluru Founders</h2><p>The largest founder community in Bengaluru - a space for early and growth-stage founders to share wins, ask hard questions, and connect with peers.</p><div className="featured-meta"><span>👥 1.2K Members</span><span>💬 Active discussions</span><span>📍 Bengaluru</span><span className="public-meta">🔓 Public Group</span></div><div className="featured-actions"><button className="button primary">Join Group</button><a className="button ghost" href="/groups/bengaluru-founders">View Group →</a></div></div><div className="featured-group-side"><div className="member-cluster">{["VA","SP","RK","AN","PK","RD"].map((item) => <span key={item}>{item}</span>)}</div><small>+ 1,180 members</small><article><b>💬 Latest Discussion</b><strong>How SaaS founders are navigating sales cycles in 2025</strong><small>24 replies · 2h ago</small></article></div></section>;
+function GroupsHeader({ stats, total, loading }) {
+  const values = [
+    [stats?.total_active_groups ?? total ?? 0, "Active Groups"],
+    [stats?.total_founders ?? 0, "Members"],
+    ["—", "Discussions This Week"]
+  ];
+  return <section className="groups-page-header"><Breadcrumb items={["Groups"]} /><div className="groups-title-row"><div><h1>Founder Groups</h1><p>Join focused communities of Karnataka founders, operators, and builders working in the same space as you.</p></div><div className="groups-header-side"><div className="groups-header-stats">{values.map(([value, label]) => <div key={label}>{loading ? <i className="people-stat-skeleton"></i> : <strong>{value}</strong>}<span>{label}</span></div>)}</div><a className="button primary" href="/groups/create">＋ Create Group</a></div></div></section>;
 }
 
-function RecommendedGroups() {
-  const recs = [["🏙️","Bengaluru Founders","1.2K Members · 🔥 Active","Near you: Bengaluru"],["💻","SaaS Builders Karnataka","840 Members · 🔥 Active","Matches: SaaS"],["💰","Fintech Builders","1.1K Members · 🔥 Active","Matches: Fintech"],["🌿","Agritech Karnataka","860 Members · Active","Matches: Agritech"]];
-  return <section className="recommended-groups"><div className="recommended-header"><div><h2>Recommended for You</h2><p>Based on your interests and location</p></div><a href="#all">Browse All →</a></div><div className="recommended-row">{recs.map(([icon,name,meta,why]) => <article key={name}><div><span>{icon}</span><h3>{name}</h3></div><p>{meta}</p><small>{why}</small><button>Join Group</button></article>)}</div></section>;
+function FeaturedGroupBanner({ group, onJoin, membership }) {
+  if (!group) return null;
+  const joined = Boolean(membership);
+  return <section className="featured-group-banner"><div><span className="featured-pill">🔥 Featured Group of the Week</span><h2>{group.name}</h2><p>{group.short_description}</p><div className="featured-meta"><span>👥 {groupMemberCount(group)} Members</span><span>💬 Discussions pending</span><span className="public-meta">{groupPrivacyIcon(group.privacy_type)} {groupPrivacyLabel(group.privacy_type)} Group</span></div><div className="featured-actions"><button className="button primary" onClick={() => onJoin(group)}>{joined ? "✓ Joined" : group.privacy_type === "invite_only" ? "Request to Join" : "Join Group"}</button><a className="button ghost" href={`/groups/${group.slug}`}>View Group →</a></div></div><div className="featured-group-side"><div className="member-cluster">{Array.from({ length: Math.min(6, Math.max(1, groupMemberCount(group))) }, (_, index) => <span key={index}>{groupIcon(group)}</span>)}</div><small>{groupMemberCount(group)} members</small></div></section>;
 }
 
-function GroupsToolbar() {
-  return <section className="groups-tabs"><div className="groups-tab-row"><nav>{["Featured","My Groups (3)","Browse All","Recommended"].map((tab,index) => <button className={index===0 ? "active" : ""} key={tab}>{tab}</button>)}</nav><label className="select-filter"><span>Sort:</span><select><option>Most Active</option><option>Newest</option><option>Most Members</option><option>A-Z</option></select></label></div><div className="groups-filter-row"><div className="resource-search"><Search size={16}/><input placeholder="Search groups by name or keyword..." /></div>{[["Category:",["All Categories","Sector-based","Geography-based","Women Founders"]],["Location:",["All Cities","Bengaluru","Mysuru","Mangaluru"]],["Privacy:",["All","Public","Private","Invite-Only"]],["Activity:",["All","🔥 Active","Quiet","New"]]].map(([label,opts]) => <label className="select-filter" key={label}><span>{label}</span><select>{opts.map(o => <option key={o}>{o}</option>)}</select></label>)}<button className="mobile-filter"><Filter size={16}/>Filter & Sort</button><p>Showing 82 groups</p></div></section>;
+function RecommendedGroups({ groups, memberships, onJoin }) {
+  if (!groups.length) return null;
+  return <section className="recommended-groups"><div className="recommended-header"><div><h2>Recommended for You</h2><p>Based on available active groups</p></div><a href="#all">Browse All →</a></div><div className="recommended-row">{groups.map((group) => <article key={group.id}><div><span>{groupIcon(group)}</span><h3>{group.name}</h3></div><p>{groupMemberCount(group)} Members · {groupPrivacyIcon(group.privacy_type)} {groupPrivacyLabel(group.privacy_type)}</p><small>{groupLocation(group)}</small><button className={memberships[group.id] ? "joined" : ""} onClick={() => onJoin(group)}>{memberships[group.id] ? "✓ Joined" : "Join Group"}</button></article>)}</div></section>;
 }
 
-function TrendingGroups() {
-  return <section className="trending-groups"><div><h2>🔥 Trending This Week</h2><span><button>‹</button><button>›</button></span></div><div className="trending-row">{[["🏙️","Bengaluru Founders","48 new posts"],["💰","Fintech Builders","32 new posts"],["👩","Women Entrepreneurs","28 new posts"],["🌿","Agritech Karnataka","21 new posts"],["💻","SaaS Builders Karnataka","19 new posts"]].map(([icon,name,posts],index) => <article key={name}><b>{index+1}</b><span>{icon}</span><div><strong>{name}</strong><small>{posts} this week</small></div></article>)}</div></section>;
+function GroupsToolbar({ total, query, onQuery }) {
+  return <section className="groups-tabs"><div className="groups-tab-row"><nav>{["Browse All", "Recommended", "My Groups", "Featured"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab}>{tab}</button>)}</nav><label className="select-filter"><span>Sort:</span><select><option>Newest</option><option>Most Members</option><option>A-Z</option></select></label></div><div className="groups-filter-row"><div className="resource-search"><Search size={16}/><input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search groups by name or keyword..." /></div>{[["Category:",["All Categories","Sector-based","Geography-based","Women Founders"]],["Location:",["All Cities","Bengaluru","Karnataka-wide"]],["Privacy:",["All","Public","Private","Invite-Only"]]].map(([label,opts]) => <label className="select-filter" key={label}><span>{label}</span><select>{opts.map(o => <option key={o}>{o}</option>)}</select></label>)}<button className="mobile-filter"><Filter size={16}/>Filter & Sort</button><p>Showing {total} {total === 1 ? "group" : "groups"}</p></div></section>;
 }
 
-function GroupDirectoryCard({ group }) {
-  const [category,name,privacy,activity,location,description,members,lastActive,discussions,button,color,icon] = group;
-  const [state,setState] = React.useState(button);
-  return <article className="group-directory-card" style={{"--group-color":color}}><a className={`group-banner ${groupClass(category)}`} href="/groups/bengaluru-founders"><span className={`privacy-badge ${groupClass(privacy)}`}>{privacy === "Public" ? "🔓" : privacy === "Private" ? "🔒" : "🔑"} {privacy}</span><small>{activity === "🔥 Active" ? activity : activity}</small></a><div className="group-directory-body"><span className="group-directory-logo">{icon}</span><a href="/groups/bengaluru-founders"><h3>{name}</h3></a><span className={`group-category-badge ${groupClass(category)}`}>{category}</span><p>{description}</p><small>📍 {location}</small><div className="group-member-row"><AvatarStack count={`${members} Members`}/><span>Active {lastActive}</span></div><div className="group-card-footer"><span>💬 {discussions} discussions</span><button className={state === "Joined" ? "joined" : state === "Pending" ? "pending" : ""} onClick={() => state === "Join Group" && setState("Joined")}>{state === "Joined" ? "✓ Joined" : state}</button></div></div></article>;
+function TrendingGroups({ groups }) {
+  if (!groups.length) return null;
+  return <section className="trending-groups"><div><h2>🔥 Trending Groups</h2><span><button>‹</button><button>›</button></span></div><div className="trending-row">{groups.map((group,index) => <article key={group.id}><b>{index+1}</b><span>{groupIcon(group)}</span><div><strong>{group.name}</strong><small>{groupMemberCount(group)} members</small></div></article>)}</div></section>;
+}
+
+function GroupDirectoryCard({ group, membership, onJoin, onLeave, busy }) {
+  const joined = Boolean(membership);
+  const privacy = group.privacy_type || "public";
+  const memberCount = groupMemberCount(group);
+  const tags = groupTags(group).slice(0, 3);
+  return <article className="group-directory-card" style={{"--group-color":groupColor(group)}}><a className={`group-banner ${groupClass(group.category || group.slug)}`} style={{ backgroundImage: `linear-gradient(to top, rgba(29,43,83,.6), transparent), url("${groupBanner(group)}")` }} href={`/groups/${group.slug}`}><span className={`privacy-badge ${groupClass(groupPrivacyLabel(privacy))}`}>{groupPrivacyIcon(privacy)} {groupPrivacyLabel(privacy)}</span><small>Active</small></a><div className="group-directory-body"><span className="group-directory-logo">{group.logo_url ? <img src={group.logo_url} alt="" /> : groupIcon(group)}</span><a href={`/groups/${group.slug}`}><h3>{group.name}</h3></a><span className={`group-category-badge ${groupClass(group.category || "Founder")}`}>{group.category || "Founder Group"}</span><p>{group.short_description || "A focused community for Karnataka founders."}</p><small>📍 {groupLocation(group)}</small><div className="person-tags group-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}{!tags.length && <span>Community</span>}</div><div className="group-member-row"><AvatarStack count={`${memberCount} Members`}/><span>Created {relativeTime(group.created_at)}</span></div><div className="group-card-footer"><span>💬 Discussions pending</span>{joined ? <button className="joined" disabled={busy} onClick={() => onLeave(group)}>✓ Joined</button> : <button disabled={busy} onClick={() => onJoin(group)}>{privacy === "invite_only" ? "Request to Join" : "Join Group"}</button>}</div></div></article>;
+}
+
+function GroupsLoadingState() {
+  return <section className="groups-directory-grid">{Array.from({ length: 6 }, (_, index) => <article className="group-directory-card groups-card-skeleton" key={index}><div className="group-banner"></div><div className="group-directory-body"><i></i><span></span><span></span><span></span></div></article>)}</section>;
+}
+
+function GroupsErrorState({ error, onRetry }) {
+  return <section className="people-error groups-message"><strong>Could not load groups.</strong><p>{error?.message || "Check the Supabase connection and try again."}</p><button onClick={onRetry}>Try Again</button></section>;
+}
+
+function GroupsEmptyState() {
+  return <section className="people-empty groups-empty"><div><i>👥</i><h2>No groups yet</h2><p>Be the first founder to create a group and bring people together.</p><a className="button primary" href="/groups/create">Create Group</a></div></section>;
 }
 
 function GroupsPage() {
-  return <><Header/><main><GroupsHeader/><FeaturedGroupBanner/><RecommendedGroups/><GroupsToolbar/><TrendingGroups/><section className="groups-directory-grid">{groupsDirectory.map(group => <GroupDirectoryCard group={group} key={group[1]}/>)}<button className="load-more">Load More Groups</button></section></main><Footer/></>;
+  const { user } = useAuth();
+  const [page, setPage] = React.useState(1);
+  const [query, setQuery] = React.useState("");
+  const [reloadKey, setReloadKey] = React.useState(0);
+  const [busyGroupId, setBusyGroupId] = React.useState(null);
+  const { groups, stats, featured, recommended, trending, memberships, total, loading, error } = useGroupsPageData(page, reloadKey, user?.id);
+  const visibleGroups = groups.filter((group) => `${group.name || ""} ${group.short_description || ""} ${group.category || ""} ${groupLocation(group)} ${groupTags(group).join(" ")}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const joinGroup = async (group) => {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+    setBusyGroupId(group.id);
+    if (group.privacy_type === "invite_only") {
+      await supabase.from("notifications").insert({ profile_id: user.id, notification_type: "group_join_request", title: "Group join request", message: `Requested to join ${group.name}`, reference_table: "groups", reference_id: group.id });
+    } else {
+      const { error } = await supabase.from("group_members").insert({ group_id: group.id, profile_id: user.id, group_role: "member" });
+      if (!error) await supabase.from("xp_events").insert({ profile_id: user.id, action_type: "group_joined", points: 5, reference_table: "groups", reference_id: group.id });
+    }
+    setBusyGroupId(null);
+    setReloadKey((key) => key + 1);
+  };
+  const leaveGroup = async (group) => {
+    if (!user) return;
+    setBusyGroupId(group.id);
+    await supabase.from("group_members").delete().eq("group_id", group.id).eq("profile_id", user.id);
+    setBusyGroupId(null);
+    setReloadKey((key) => key + 1);
+  };
+  const totalPages = Math.max(1, Math.ceil(total / GROUPS_PAGE_SIZE));
+  return <><Header/><main><GroupsHeader stats={stats} total={total} loading={loading}/>{!loading && !error && <FeaturedGroupBanner group={featured} memberships={memberships} membership={featured ? memberships[featured.id] : null} onJoin={joinGroup}/>}<RecommendedGroups groups={recommended} memberships={memberships} onJoin={joinGroup}/><GroupsToolbar total={total} query={query} onQuery={setQuery}/><TrendingGroups groups={trending}/>{loading && <GroupsLoadingState/>}{error && <GroupsErrorState error={error} onRetry={() => setReloadKey((key) => key + 1)}/>} {!loading && !error && groups.length === 0 && <GroupsEmptyState/>}{!loading && !error && groups.length > 0 && <section className="groups-directory-grid" id="all">{visibleGroups.map(group => <GroupDirectoryCard group={group} membership={memberships[group.id]} onJoin={joinGroup} onLeave={leaveGroup} busy={busyGroupId === group.id} key={group.id}/>)}{visibleGroups.length === 0 && <p className="people-no-results">No groups match these filters.</p>}{totalPages > 1 && <button className="load-more" onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={page === totalPages}>{page === totalPages ? "All Groups Loaded" : "Load More Groups"}</button>}</section>}</main><Footer/></>;
 }
 
-const groupDiscussions = [
-  ["?","How SaaS founders are navigating sales cycles in 2025?",["SaaS","Sales"],"Arjun N.","2h ago","24","18","✓ Answered","question"],
-  ["📢","Our next meetup is confirmed - May 24th at Koramangala Social",["Events"],"Admin","5h ago","56","12","📌 Pinned","announcement"],
-  ["💡","What if we did monthly pitch practice sessions?",["Community"],"Priya K.","1d ago","32","21","","idea"],
-  ["💬","Looking for a co-founder in the logistics space",["Co-founder"],"Rahul D.","2d ago","15","7","","general"],
-  ["?","Best approach for pre-seed fundraising in India 2025?",["Fundraising"],"Meera S.","3d ago","41","29","","question"]
-];
+function useGroupDetail(slug, userId, reloadKey) {
+  const [state, setState] = React.useState({ group: null, members: [], events: [], files: [], discourseLink: null, myRole: null, loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase || !slug) return undefined;
+    let cancelled = false;
+    setState((current) => ({ ...current, loading: true, error: null }));
+    Promise.all([
+      supabase.from("groups").select("*, cities ( name ), group_rules ( rule_text, rule_order ), group_interests ( interest_tags ( label ) ), group_members ( count )").eq("slug", slug).maybeSingle()
+    ]).then(async ([groupResult]) => {
+      if (cancelled) return;
+      if (groupResult.error) throw groupResult.error;
+      const group = groupResult.data;
+      const pendingRoleResult = group && userId ? await supabase.from("group_members").select("group_role").eq("group_id", group.id).eq("profile_id", userId).maybeSingle() : { data: null };
+      const pendingRole = pendingRoleResult.data?.group_role || null;
+      if (!group || (group.status !== "active" && group.created_by !== userId && pendingRole !== "admin")) {
+        setState({ group: null, members: [], events: [], files: [], discourseLink: null, myRole: null, loading: false, error: null });
+        return;
+      }
+      const [membersResult, eventsResult, filesResult, linkResult, roleResult] = await Promise.all([
+        supabase.from("group_members").select("profile_id, group_role, joined_at, profiles ( id, username, display_name, role, avatar_url, bio )").eq("group_id", group.id).order("joined_at", { ascending: true }),
+        supabase.from("events").select("id, title, start_at, status").eq("group_id", group.id).order("start_at", { ascending: true }).limit(6),
+        supabase.from("group_files").select("*").eq("group_id", group.id).order("created_at", { ascending: false }).limit(12),
+        supabase.from("group_discourse_links").select("*").eq("group_id", group.id).maybeSingle(),
+        userId ? supabase.from("group_members").select("group_role").eq("group_id", group.id).eq("profile_id", userId).maybeSingle() : Promise.resolve({ data: null })
+      ]);
+      setState({ group, members: membersResult.error ? [] : membersResult.data || [], events: eventsResult.error ? [] : eventsResult.data || [], files: filesResult.error ? [] : filesResult.data || [], discourseLink: linkResult.error ? null : linkResult.data, myRole: roleResult.data?.group_role || pendingRole, loading: false, error: null });
+    }).catch((error) => {
+      if (!cancelled) setState((current) => ({ ...current, loading: false, error }));
+    });
+    return () => { cancelled = true; };
+  }, [slug, userId, reloadKey]);
+  return state;
+}
 
-function GroupDetailPage() {
-  return <><Header/><main className="group-detail-page"><Breadcrumb items={["Groups","Bengaluru Founders"]}/><section className="group-detail-banner"><div><span className="group-directory-logo">🏙️</span><h1>Bengaluru Founders</h1><span className="privacy-badge public">🔓 Public</span><small>🔥 Active</small><p>1,200 Members · Managed by Vikram Anand</p></div></section><section className="group-action-bar"><div><strong>✓ You're a member</strong><button>Leave Group</button></div><div><button>🔔 Notifications</button><button>👤 Invite Members</button><button>↗</button></div></section><nav className="group-detail-tabs">{["Discussions","Events","Members","Files","About"].map((tab,index) => <button className={index===0?"active":""} key={tab}>{tab}</button>)}</nav><section className="group-discussion-layout"><div className="discussion-feed"><article className="pinned-post"><span>📌 Pinned</span><h3>Our next meetup is confirmed - May 24th at Koramangala Social</h3><p>Join us for an evening of founder conversations and networking.</p><small>Admin · 5h ago</small></article><div className="discussion-sort"><div><button className="active">Latest</button><button>Most Liked</button><button>Unanswered</button></div><span>Unread (3)</span></div><button className="start-discussion">＋ Start Discussion in This Group</button><div className="discussion-list">{groupDiscussions.map(([icon,title,tags,author,time,votes,replies,badge,tone]) => <article key={title}><i className={tone}>{icon}</i><div><h3>{title}{badge && <span>{badge}</span>}</h3><div className="tag-row">{tags.map(tag => <span key={tag}>{tag}</span>)}</div><small>{author} · {time}</small></div><aside><span>▲ {votes}</span><span>💬 {replies}</span></aside></article>)}</div><a className="load-discussions" href="#more">Load More Discussions</a></div><aside className="group-detail-sidebar"><GroupWidget title="About This Group"><p>Bengaluru's largest founder community for early and growth-stage startups.</p><small>👥 1,200 Members</small><small>💬 48 posts/week</small><small>🗓 Est. Jan 2024</small></GroupWidget><GroupWidget title="Admins & Moderators"><div className="admin-row"><span>VA</span><strong>Vikram Anand</strong><small>Admin</small></div><div className="admin-row"><span>SP</span><strong>Sneha Patil</strong><small>Moderator</small></div></GroupWidget><GroupWidget title="Recently Joined"><AvatarStack count="+ 1,194 more members"/><a href="#members">View All Members →</a></GroupWidget></aside></section></main><button className="group-admin-fab">⚙️</button></>;
+function GroupDetailPage({ slug }) {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = React.useState("Discussions");
+  const [reloadKey, setReloadKey] = React.useState(0);
+  const { group, members, events, files, discourseLink, myRole, loading, error } = useGroupDetail(slug, user?.id, reloadKey);
+  const isAdmin = myRole === "admin";
+  const removeMember = async (profileId) => {
+    if (!group || !isAdmin || profileId === user?.id) return;
+    await supabase.from("group_members").delete().eq("group_id", group.id).eq("profile_id", profileId);
+    setReloadKey((key) => key + 1);
+  };
+  if (loading) return <><Header/><main className="group-detail-page"><section className="profile-page-loading">Loading group...</section></main><Footer/></>;
+  if (error) return <><Header/><main className="group-detail-page"><GroupsErrorState error={error} onRetry={() => setReloadKey((key) => key + 1)}/></main><Footer/></>;
+  if (!group) return <><Header/><main className="profile-signed-out"><h1>Group unavailable</h1><p>This group is not active or does not exist.</p><a className="button secondary" href="/groups">Back to Groups</a></main><Footer/></>;
+  const rules = (group.group_rules || []).slice().sort((a, b) => (a.rule_order || 0) - (b.rule_order || 0));
+  const admins = members.filter((member) => member.group_role === "admin");
+  return <><Header/><main className="group-detail-page"><Breadcrumb items={["Groups", group.name]}/><section className="group-detail-banner" style={{ backgroundImage: `linear-gradient(to top, rgba(29,43,83,.85), transparent), url("${groupBanner(group)}")` }}><div><span className="group-directory-logo" style={{"--group-color":groupColor(group)}}>{group.logo_url ? <img src={group.logo_url} alt="" /> : groupIcon(group)}</span><h1>{group.name}</h1><span className={`privacy-badge ${groupClass(groupPrivacyLabel(group.privacy_type))}`}>{groupPrivacyIcon(group.privacy_type)} {groupPrivacyLabel(group.privacy_type)}</span><small>Active</small><p>{groupMemberCount(group)} Members · {groupLocation(group)}</p></div></section><section className="group-action-bar"><div><strong>{myRole ? `✓ You're a ${myRole}` : "Join this group to participate"}</strong></div><div><button>🔔 Notifications</button><button>👤 Invite Members</button><a className="button secondary" href="/groups">↗</a></div></section><nav className="group-detail-tabs">{["Discussions","Events","Members","Files","About"].map((tab) => <button className={activeTab===tab?"active":""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</nav><section className="group-discussion-layout"><div className="discussion-feed"><GroupTabContent tab={activeTab} group={group} members={members} events={events} files={files} rules={rules} discourseLink={discourseLink} isAdmin={isAdmin} onRemoveMember={removeMember}/></div><aside className="group-detail-sidebar"><GroupWidget title="About This Group"><p>{group.short_description || group.full_description || "A focused founder group on Mundhe Banni."}</p><small>👥 {groupMemberCount(group)} Members</small><small>📍 {groupLocation(group)}</small><small>🗓 Est. {group.created_at ? new Date(group.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : "Recently"}</small></GroupWidget><GroupWidget title="Admins & Moderators">{admins.length ? admins.map((member) => <div className="admin-row" key={member.profile_id}><span>{(member.profiles?.display_name || member.profiles?.username || "A").slice(0,2).toUpperCase()}</span><strong>{member.profiles?.display_name || member.profiles?.username || "Admin"}</strong><small>{member.group_role}</small></div>) : <p>No admins listed.</p>}</GroupWidget><GroupWidget title="Recently Joined"><AvatarStack count={`${Math.max(0, members.length - 4)} more members`}/><button className="text-action" onClick={() => setActiveTab("Members")}>View All Members →</button></GroupWidget></aside></section></main>{isAdmin && <button className="group-admin-fab">⚙️</button>}</>;
+}
+
+function GroupTabContent({ tab, group, members, events, files, rules, discourseLink, isAdmin, onRemoveMember }) {
+  if (tab === "Discussions") {
+    if (!discourseLink?.category_id) return <div className="group-tab-empty"><MessageCircle size={30}/><h3>This group doesn't have a discussion space set up yet.</h3><p>Once a Discourse category is linked, group discussions will appear here.</p></div>;
+    return <GroupDiscourseTopics categoryId={discourseLink.category_id} />;
+  }
+  if (tab === "Members") return <div className="group-member-list">{members.map((member) => <article className="group-member-card" key={member.profile_id}><MemberAvatar name={member.profiles?.display_name || member.profiles?.username} role={member.profiles?.role} avatarUrl={member.profiles?.avatar_url}/><div><strong>{member.profiles?.display_name || member.profiles?.username || "Member"}</strong><RoleBadge role={member.profiles?.role}/><small>Joined {member.joined_at ? relativeTime(member.joined_at) : "recently"}</small></div>{isAdmin && member.group_role !== "admin" && <button onClick={() => onRemoveMember(member.profile_id)}>Remove</button>}</article>)}</div>;
+  if (tab === "Events") return events.length ? <div className="group-simple-list">{events.map((event) => <article key={event.id}><strong>{event.title}</strong><small>{event.start_at ? new Date(event.start_at).toLocaleString("en-IN") : "Date pending"}</small></article>)}</div> : <div className="group-tab-empty"><CalendarDays size={30}/><h3>No events yet for this group.</h3></div>;
+  if (tab === "Files") return files.length ? <div className="group-simple-list">{files.map((file) => <article key={file.id}><strong>{file.file_name || file.title || "Group file"}</strong><small>{file.created_at ? relativeTime(file.created_at) : "recently"}</small></article>)}</div> : <div className="group-tab-empty"><FileText size={30}/><h3>No files shared yet.</h3></div>;
+  return <div className="group-about-tab"><h2>About {group.name}</h2><p>{group.full_description || group.short_description || "No full description has been added yet."}</p><h3>Community Rules</h3>{rules.length ? <ol>{rules.map((rule) => <li key={`${rule.rule_order}-${rule.rule_text}`}>{rule.rule_text}</li>)}</ol> : <p>No rules added yet.</p>}</div>;
+}
+
+function GroupDiscourseTopics({ categoryId }) {
+  const { data, error, isLoading } = useCommunitySWR(`c/${categoryId}/show.json`, { topic_list: { topics: [] } });
+  const topics = data?.topic_list?.topics || [];
+  if (isLoading) return <SkeletonList />;
+  if (error) return <div className="group-tab-empty"><MessageCircle size={30}/><h3>Could not load group discussions.</h3><p>Open the full forum if you need live discussion data right now.</p></div>;
+  return topics.length ? <div className="community-topic-list">{topics.map((topic) => <CommunityTopicRow topic={topic} category={{ name: "Group", color: "E58A2B" }} onLogin={() => {}} key={topic.id}/>)}</div> : <div className="group-tab-empty"><MessageCircle size={30}/><h3>No discussions yet.</h3></div>;
 }
 
 function GroupWidget({title,children}) {
@@ -1151,7 +1514,74 @@ function GroupWidget({title,children}) {
 }
 
 function CreateGroupPage() {
-  return <><Header/><main className="create-group-page"><Breadcrumb items={["Groups","Create Group"]}/><h1>Create a New Group</h1><p>Groups are reviewed and approved by the Mundhe Banni admin team before going live.</p><div className="info-note">ℹ️ Your group submission will be reviewed. You'll receive an email once approved. You can use the platform normally while your group is pending review.</div><form className="upload-form"><UploadSection title="Group Identity"><label>Group Name *<input placeholder="e.g. Bengaluru SaaS Founders"/></label><label>Short Description *<input placeholder="One line - what is this group about?"/></label><label>Full Description<textarea placeholder="Describe the group's purpose, who should join, and what members can expect."/></label><label>Category *<select><option>Select...</option><option>Sector-based</option><option>Geography-based</option><option>Women Founders</option></select></label><label>City / Region<select><option>Karnataka-wide</option><option>Bengaluru</option><option>Mysuru</option></select></label></UploadSection><UploadSection title="Branding"><label>Group Logo<div className="dropzone compact">Upload a square logo (PNG, min 200x200px)</div></label><label>Banner Image<div className="dropzone compact">Upload a banner (JPG or PNG, min 1200x300px)</div></label></UploadSection><UploadSection title="Privacy & Settings"><div className="privacy-selector">{[["🔓","Public","Anyone can find and join"],["🔒","Private","Approval required to join"],["🔑","Invite Only","Join by invitation only"]].map(([icon,title,desc],index)=><label className={index===0?"selected":""} key={title}><input type="radio" name="privacy" defaultChecked={index===0}/>{icon}<strong>{title}</strong><small>{desc}</small></label>)}</div><label>Who can upload files?<div className="format-radios"><label><input type="radio" name="files" defaultChecked/>Group Admin only</label><label><input type="radio" name="files"/>All members</label></div></label><label>Interest Tags<div className="industry-pills selectable">{["SaaS","Fintech","Agritech","Edtech","D2C","Healthcare","Deep Tech"].map((tag,index)=><span className={index<2?"selected":""} key={tag}>{tag}</span>)}</div></label></UploadSection><UploadSection title="Community Rules (Optional)">{["Be respectful and constructive in all discussions.","No spam, self-promotion, or unsolicited DMs.","Keep discussions relevant to the group's focus area."].map((rule,index)=><div className="rule-row" key={rule}><span>{index+1}.</span><input defaultValue={rule}/><button type="button">×</button></div>)}</UploadSection><div className="submit-row"><button type="button">Save as Draft</button><button type="button">Submit for Review →</button><small>By creating a group you agree to Mundhe Banni's <a href="#guidelines">Community Guidelines</a>.</small></div></form></main></>;
+  const { user, loading } = useAuth();
+  const [meta, setMeta] = React.useState({ cities: [], tags: [] });
+  const [selectedTags, setSelectedTags] = React.useState([]);
+  const [privacy, setPrivacy] = React.useState("public");
+  const [filePermission, setFilePermission] = React.useState("admin_only");
+  const [rules, setRules] = React.useState(["Be respectful and constructive in all discussions.", "No spam, self-promotion, or unsolicited DMs.", "Keep discussions relevant to the group's focus area."]);
+  const [form, setForm] = React.useState({ name: "", short_description: "", full_description: "", category: "", city_id: "" });
+  const [submitting, setSubmitting] = React.useState(false);
+  const [message, setMessage] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!supabase) return undefined;
+    let cancelled = false;
+    Promise.all([
+      supabase.from("cities").select("id, name").order("name", { ascending: true }),
+      supabase.from("interest_tags").select("id, label, slug").order("label", { ascending: true })
+    ]).then(([citiesResult, tagsResult]) => {
+      if (!cancelled) setMeta({ cities: citiesResult.error ? [] : citiesResult.data || [], tags: tagsResult.error ? [] : tagsResult.data || [] });
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  const toggleTag = (tagId) => setSelectedTags((current) => current.includes(tagId) ? current.filter((id) => id !== tagId) : [...current, tagId]);
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+    setSubmitting(true);
+    setMessage(null);
+    const baseSlug = slugify(form.name);
+    const slug = `${baseSlug}-${Date.now().toString(36).slice(-4)}`;
+    const { data: newGroup, error } = await supabase.from("groups").insert({
+      slug,
+      name: form.name,
+      short_description: form.short_description,
+      full_description: form.full_description,
+      category: form.category,
+      city_id: form.city_id || null,
+      logo_url: null,
+      banner_url: null,
+      privacy_type: privacy,
+      file_upload_permission: filePermission,
+      created_by: user.id,
+      status: "pending"
+    }).select().single();
+    if (error) {
+      setMessage({ type: "error", text: error.message || "Could not submit this group." });
+      setSubmitting(false);
+      return;
+    }
+    const cleanRules = rules.map((rule) => rule.trim()).filter(Boolean);
+    await Promise.all([
+      selectedTags.length ? supabase.from("group_interests").insert(selectedTags.map((tagId) => ({ group_id: newGroup.id, tag_id: tagId }))) : Promise.resolve(),
+      cleanRules.length ? supabase.from("group_rules").insert(cleanRules.map((rule_text, index) => ({ group_id: newGroup.id, rule_order: index, rule_text }))) : Promise.resolve(),
+      supabase.from("group_members").insert({ group_id: newGroup.id, profile_id: user.id, group_role: "admin" })
+    ]);
+    setSubmitting(false);
+    setMessage({ type: "success", text: "Your group has been submitted for review. You'll be notified once it's approved." });
+    window.setTimeout(() => { window.location.href = "/groups"; }, 1600);
+  };
+
+  if (loading) return <><Header/><main className="create-group-page"><p>Loading...</p></main><Footer/></>;
+  if (!user) return <><Header/><main className="profile-signed-out"><Lock size={34}/><h1>Log in to create a group</h1><p>Group submissions are tied to your Mundhe Banni profile.</p><a className="button primary" href="/login">Log In</a></main><Footer/></>;
+
+  return <><Header/><main className="create-group-page"><Breadcrumb items={["Groups","Create Group"]}/><h1>Create a New Group</h1><p>Groups are reviewed and approved by the Mundhe Banni admin team before going live.</p><div className="info-note">ℹ️ Your group submission will be reviewed. You'll receive an email once approved. You can use the platform normally while your group is pending review.</div><form className="upload-form" onSubmit={submit}><UploadSection title="Group Identity"><label>Group Name *<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="e.g. Bengaluru SaaS Founders" required/></label><label>Short Description *<input value={form.short_description} onChange={(event) => update("short_description", event.target.value)} placeholder="One line - what is this group about?" required/></label><label>Full Description<textarea value={form.full_description} onChange={(event) => update("full_description", event.target.value)} placeholder="Describe the group's purpose, who should join, and what members can expect."/></label><label>Category *<select value={form.category} onChange={(event) => update("category", event.target.value)} required><option value="">Select...</option><option>Sector-based</option><option>Geography-based</option><option>Women Founders</option><option>Founder / General</option></select></label><label>City / Region<select value={form.city_id} onChange={(event) => update("city_id", event.target.value)}><option value="">Karnataka-wide</option>{meta.cities.map((city) => <option value={city.id} key={city.id}>{city.name}</option>)}</select></label></UploadSection><UploadSection title="Branding"><label>Group Logo<div className="dropzone compact">Storage upload will be connected next. Submit without a logo for now.</div></label><label>Banner Image<div className="dropzone compact">Storage upload will be connected next. Submit without a banner for now.</div></label></UploadSection><UploadSection title="Privacy & Settings"><div className="privacy-selector">{[["🔓","public","Public","Anyone can find and join"],["🔒","private","Private","Auto-approved for this testing phase"],["🔑","invite_only","Invite Only","Request notification sent to admins"]].map(([icon,value,title,desc])=><label className={privacy===value?"selected":""} key={value}><input type="radio" name="privacy" checked={privacy===value} onChange={() => setPrivacy(value)}/>{icon}<strong>{title}</strong><small>{desc}</small></label>)}</div><label>Who can upload files?<div className="format-radios"><label><input type="radio" name="files" checked={filePermission==="admin_only"} onChange={() => setFilePermission("admin_only")}/>Group Admin only</label><label><input type="radio" name="files" checked={filePermission==="members"} onChange={() => setFilePermission("members")}/>All members</label></div></label><label>Interest Tags<div className="industry-pills selectable">{meta.tags.slice(0, 14).map((tag)=><button type="button" className={selectedTags.includes(tag.id)?"selected":""} onClick={() => toggleTag(tag.id)} key={tag.id}>{tag.label}</button>)}</div></label></UploadSection><UploadSection title="Community Rules (Optional)">{rules.map((rule,index)=><div className="rule-row" key={index}><span>{index+1}.</span><input value={rule} onChange={(event) => setRules((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}/><button type="button" onClick={() => setRules((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button></div>)}<button className="button secondary" type="button" onClick={() => setRules((current) => [...current, ""])}>Add Rule</button></UploadSection>{message && <div className={`form-message ${message.type}`}>{message.text}</div>}<div className="submit-row"><button type="button">Save as Draft</button><button type="submit" disabled={submitting}>{submitting ? "Submitting..." : "Submit for Review →"}</button><small>By creating a group you agree to Mundhe Banni's <a href="#guidelines">Community Guidelines</a>.</small></div></form></main></>;
 }
 
 function Hero() {
@@ -1737,12 +2167,13 @@ function HomePage() {
 
 function App() {
   if (window.location.pathname.startsWith("/admin")) return <AdminApp />;
+  if (window.location.pathname === "/login") return <LoginPage />;
   if (window.location.pathname === "/community") return <CommunityPage />;
   if (window.location.pathname === "/my-profile") return <MyProfilePage />;
   if (window.location.pathname === "/people") return <PeoplePage />;
   if (window.location.pathname === "/groups/create") return <CreateGroupPage />;
-  if (window.location.pathname === "/groups/bengaluru-founders") return <GroupDetailPage />;
   if (window.location.pathname === "/groups") return <GroupsPage />;
+  if (window.location.pathname.startsWith("/groups/")) return <GroupDetailPage slug={decodeURIComponent(window.location.pathname.split("/")[2] || "")} />;
   if (window.location.pathname === "/events/create") return <CreateEventPage />;
   if (window.location.pathname === "/events/bengaluru-founder-meetup") return <EventDetailPage />;
   if (window.location.pathname === "/events") return <EventsPage />;
@@ -1755,4 +2186,4 @@ function App() {
   return <HomePage />;
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(<AuthProvider><App /></AuthProvider>);
