@@ -116,6 +116,7 @@ function Header() {
   const pathname = window.location.pathname;
   const { user, profile, loading, signOut } = useAuth();
   const [accountOpen, setAccountOpen] = React.useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "Member";
   const initial = displayName.charAt(0).toUpperCase();
   const logout = async () => {
@@ -140,8 +141,9 @@ function Header() {
         {!loading && user && <div className="auth-account"><button className="auth-avatar" onClick={() => setAccountOpen((open) => !open)} aria-label="Open account menu">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}</button>{accountOpen && <div className="auth-menu"><strong>{displayName}</strong><small>{user.email}</small><a href="/my-profile">My Profile</a><button onClick={logout}>Log Out</button></div>}</div>}
         {loading && <span className="auth-loading"></span>}
         <button className="language">A~ <ChevronDown size={14} /></button>
-        <button className="mobile-menu" aria-label="Open menu"><Menu /></button>
+        <button className="mobile-menu" aria-label="Open menu" onClick={() => setMobileNavOpen((open) => !open)}>{mobileNavOpen ? <X /> : <Menu />}</button>
       </div>
+      {mobileNavOpen && <nav className="mobile-nav-panel" aria-label="Mobile navigation">{navItems.map(([item, href]) => <a className={(pathname === href || (href !== "/" && pathname.startsWith(href))) ? "active" : ""} href={href} key={item}>{item}{item === "Community" && <ArrowUpRight size={13} />}</a>)}{user ? <a href="/my-profile">My Profile</a> : <a href="/login">Log In</a>}</nav>}
     </header>
   );
 }
@@ -190,6 +192,10 @@ const roleMeta = {
 
 const normalizeRole = (role = "founder") => role.toLowerCase().replaceAll(" ", "_");
 const getRoleMeta = (role) => roleMeta[normalizeRole(role)] || roleMeta.founder;
+const loginRedirect = () => {
+  const next = new URLSearchParams(window.location.search).get("next");
+  window.location.assign(next && next.startsWith("/") ? next : "/");
+};
 const getXpLevel = (xpValue = 0) => {
   const xp = Number(xpValue) || 0;
   if (xp >= 2000) return 5;
@@ -207,6 +213,7 @@ const levelProgress = (xpValue, level = getXpLevel(xpValue)) => {
 };
 
 const discourseBaseUrl = "https://mundebanni-community.discourse.group";
+const discourseNewTopicUrl = `${discourseBaseUrl}/new-topic`;
 
 const fallbackCommunityCategories = [
   { id: 11, name: "Fundraising", color: "2456A0", topic_count: 284, description: "Funding, investor readiness, and pitch feedback." },
@@ -514,7 +521,7 @@ function LoginPage() {
         setError(describeLoginError(loginError));
         return;
       }
-      window.location.assign("/people");
+      loginRedirect();
     } catch (loginError) {
       console.error("Supabase login request failed", { name: loginError?.name, message: loginError?.message });
       setError({ message: "Could not reach Supabase Auth. Check your connection and try again.", detail: `Error code: ${loginError?.name || "network_error"}` });
@@ -523,7 +530,7 @@ function LoginPage() {
     }
   };
 
-  return <><Header /><main className="login-page"><section className="login-panel"><Logo /><div><span>Admin testing access</span><h1>Welcome back</h1><p>Log in with your Mundhe Banni admin account.</p></div>{!loading && user ? <div className="already-signed-in"><strong>You're signed in as {profile?.display_name || user.email}.</strong><a className="button primary" href="/people">Continue to People</a></div> : <form onSubmit={submit}><label>Email address<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required /></label>{error && <div className="login-error" role="alert"><strong>{error.message}</strong><small>{error.detail}</small></div>}<button type="submit" disabled={submitting}>{submitting ? "Logging In..." : "Log In"}</button></form>}</section><aside className="login-context"><div><h2>Build Karnataka's founder network, together.</h2><p>Access member profiles, community conversations, events, and admin tools with one account.</p><div><span>5,200+</span><small>Founder connections</small></div></div></aside></main></>;
+  return <><Header /><main className="login-page"><section className="login-panel"><Logo /><div><span>Admin testing access</span><h1>Welcome back</h1><p>Log in with your Mundhe Banni admin account.</p></div>{!loading && user ? <div className="already-signed-in"><strong>You're signed in as {profile?.display_name || user.email}.</strong><a className="button primary" href="/">Continue to Home</a></div> : <form onSubmit={submit}><label>Email address<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required /></label>{error && <div className="login-error" role="alert"><strong>{error.message}</strong><small>{error.detail}</small></div>}<button type="submit" disabled={submitting}>{submitting ? "Logging In..." : "Log In"}</button></form>}</section><aside className="login-context"><div><h2>Build Karnataka's founder network, together.</h2><p>Access member profiles, community conversations, events, and admin tools with one account.</p><div><span>5,200+</span><small>Founder connections</small></div></div></aside></main></>;
 }
 
 const PEOPLE_PAGE_SIZE = 20;
@@ -653,11 +660,23 @@ function RoleBadge({ role }) {
   return <small className={`role-badge ${meta.className}`}>{meta.label}</small>;
 }
 
-function SpotlightCard({ member }) {
+const loadFollowedProfiles = (userId) => {
+  if (!userId) return {};
+  try {
+    return JSON.parse(localStorage.getItem(`mb_following_${userId}`) || "{}");
+  } catch {
+    return {};
+  }
+};
+
+const saveFollowedProfiles = (userId, followed) => {
+  if (userId) localStorage.setItem(`mb_following_${userId}`, JSON.stringify(followed));
+};
+
+function SpotlightCard({ member, followed, onFollow }) {
   const name = member.display_name || member.username || "Community Member";
   const xp = Number(member.xp_points) || 0;
   const level = getXpLevel(xp);
-  const [followed, setFollowed] = React.useState(false);
   return (
     <article className="spotlight-card">
       <MemberAvatar name={name} role={member.role} avatarUrl={member.avatar_url} size="large" />
@@ -666,19 +685,19 @@ function SpotlightCard({ member }) {
       <p>📍 {getMemberCity(member)}</p>
       <div className="xp-meter"><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div>
       <em>★ {xp.toLocaleString()} XP · Level {level}</em>
-      <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>
+      <button className={followed ? "following" : ""} onClick={() => onFollow?.(member)}>{followed ? "✓ Following" : "Follow"}</button>
     </article>
   );
 }
 
-function MemberSpotlight({ members }) {
+function MemberSpotlight({ members, followedProfiles, onFollow }) {
   return (
     <section className="member-spotlight">
       <div className="spotlight-head">
         <div><h2>★ Member Spotlight</h2><p>Top contributors and recently active members</p></div>
         <div><button aria-label="Previous spotlight">‹</button><button aria-label="Next spotlight">›</button></div>
       </div>
-      <div className="spotlight-row">{members.slice(0, 5).map((member) => <SpotlightCard key={member.id} member={member} />)}</div>
+      <div className="spotlight-row">{members.slice(0, 5).map((member) => <SpotlightCard key={member.id} member={member} followed={Boolean(followedProfiles[member.id])} onFollow={onFollow} />)}</div>
     </section>
   );
 }
@@ -715,13 +734,12 @@ function PeopleToolbar({ total, roleCounts, query, onQuery, roleFilter, onRoleFi
   );
 }
 
-function PersonCard({ person, isOwnProfile = false }) {
+function PersonCard({ person, isOwnProfile = false, followed = false, onFollow }) {
   const name = person.display_name || person.username || "Community Member";
   const tags = getMemberInterests(person);
   const visibleTags = tags.slice(0, 2);
   const xp = Number(person.xp_points) || 0;
   const level = getXpLevel(xp);
-  const [followed, setFollowed] = React.useState(false);
   const meta = getRoleMeta(person.role);
   return (
     <article className={`person-card ${meta.className}`}>
@@ -740,7 +758,7 @@ function PersonCard({ person, isOwnProfile = false }) {
       </div>
       <div className="person-actions">
         <a href={isOwnProfile ? "/my-profile" : `/people/${person.username || person.id}`}>{isOwnProfile ? "My Profile" : "View Profile"}</a>
-        {!isOwnProfile && <button className={followed ? "following" : ""} onClick={() => setFollowed(!followed)}>{followed ? "✓ Following" : "Follow"}</button>}
+        {!isOwnProfile && <button className={followed ? "following" : ""} onClick={() => onFollow?.(person)}>{followed ? "✓ Following" : "Follow"}</button>}
       </div>
     </article>
   );
@@ -753,7 +771,33 @@ function PeoplePage() {
   const [query, setQuery] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState("all");
   const [inviteOpen, setInviteOpen] = React.useState(false);
+  const [followedProfiles, setFollowedProfiles] = React.useState({});
   const { members, stats, roleCounts, total, loading, error } = usePeopleData(page, reloadKey);
+  React.useEffect(() => {
+    setFollowedProfiles(loadFollowedProfiles(user?.id));
+  }, [user?.id]);
+  const toggleFollow = async (person) => {
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent("/people")}`;
+      return;
+    }
+    if (person.id === user.id) return;
+    const nextFollowed = !followedProfiles[person.id];
+    const next = { ...followedProfiles, [person.id]: nextFollowed };
+    if (!nextFollowed) delete next[person.id];
+    setFollowedProfiles(next);
+    saveFollowedProfiles(user.id, next);
+    if (supabase) {
+      const request = nextFollowed
+        ? supabase.from("profile_follows").insert({ follower_id: user.id, following_id: person.id })
+        : supabase.from("profile_follows").delete().eq("follower_id", user.id).eq("following_id", person.id);
+      try {
+        await request;
+      } catch {
+        // Keep the UI responsive even before persistent follows are fully wired in Supabase.
+      }
+    }
+  };
   const filteredMembers = members.filter((member) => {
     const role = normalizeRole(member.role);
     const matchesRole = roleFilter === "all" || role === roleFilter || (roleFilter === "sme" && role === "expert");
@@ -769,12 +813,12 @@ function PeoplePage() {
       <Header />
       <main>
         <PeopleHeader stats={stats} roleCounts={roleCounts} loading={loading} />
-        {!loading && !error && members.length >= 3 && <MemberSpotlight members={members} />}
+        {!loading && !error && members.length >= 3 && <MemberSpotlight members={members} followedProfiles={followedProfiles} onFollow={toggleFollow} />}
         <PeopleToolbar total={total} roleCounts={roleCounts} query={query} onQuery={setQuery} roleFilter={roleFilter} onRoleFilter={setRoleFilter} />
         {loading && <PeopleLoadingState />}
         {error && <PeopleErrorState error={error} onRetry={() => setReloadKey((key) => key + 1)} />}
         {showEmptyState && <PeopleEmptyState member={ownMember} user={user} onInvite={() => setInviteOpen(true)} />}
-        {!loading && !error && !showEmptyState && <section className="people-grid">{filteredMembers.map((person) => <PersonCard key={person.id} person={person} isOwnProfile={person.id === user?.id} />)}{filteredMembers.length === 0 && <p className="people-no-results">No members match these filters.</p>}</section>}
+        {!loading && !error && !showEmptyState && <section className="people-grid">{filteredMembers.map((person) => <PersonCard key={person.id} person={person} isOwnProfile={person.id === user?.id} followed={Boolean(followedProfiles[person.id])} onFollow={toggleFollow} />)}{filteredMembers.length === 0 && <p className="people-no-results">No members match these filters.</p>}</section>}
         {!loading && !error && !showEmptyState && totalPages > 1 && <nav className="pagination people-pagination" aria-label="People pagination"><button disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>‹</button>{Array.from({ length: totalPages }, (_, index) => index + 1).slice(0, 7).map((number) => <button className={number === page ? "active" : ""} onClick={() => setPage(number)} key={number}>{number}</button>)}<button disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>›</button></nav>}
       </main>
       <Footer />
@@ -1129,27 +1173,37 @@ function MyListingPage() {
   );
 }
 
-const eventsDirectory = [
-  ["Group Meetup", "MAY", "24", "Bengaluru Founder Meetup", "Sat, 24 May · 5:00 PM", "Koramangala Social, Bangalore", "+42", "Bengaluru Founders Group", "RSVP Free", "meetup"],
-  ["Community Conference", "MAY", "25", "Startup Funding Workshop", "Sun, 25 May · 10:00 AM", "91springboard, Bangalore", "+86", "Mundhe Banni", "RSVP Free", "conference"],
-  ["Virtual", "MAY", "27", "Women Founders Circle", "Tue, 27 May · 7:00 PM", "Online", "+63", "Women Entrepreneurs Group", "RSVP Free", "women"],
-  ["Flagship Event", "MAY", "30", "Karnataka Startup Summit 2025", "Fri-Sat, 30-31 May · 9:30 AM", "NIMHANS Convention Centre", "+428", "Mundhe Banni", "Get Tickets", "flagship"],
-  ["Community Conference", "JUN", "05", "Agritech Karnataka Conclave", "Thu, 5 Jun · 11:00 AM", "UAS Campus, Bengaluru", "+54", "Agritech Karnataka", "RSVP Free", "agri"],
-  ["Group Meetup", "JUN", "08", "Fintech Builders Monthly Sync", "Sun, 8 Jun · 4:00 PM", "BHIVE Workspace, Bangalore", "+38", "Fintech Builders Group", "RSVP Free", "fintech"],
-  ["Virtual", "JUN", "12", "SaaS Founders AMA Session", "Thu, 12 Jun · 6:30 PM", "Online", "+29", "Bengaluru Founders Group", "RSVP Free", "saas"],
-  ["Community Conference", "JUN", "15", "Investor Connect Mysuru", "Sun, 15 Jun · 10:00 AM", "Mysuru, Karnataka", "+71", "Mundhe Banni", "RSVP Free", "investor"]
+const pastMundheBanniMeetups = [
+  {
+    type: "Past Meetup",
+    month: "SEP",
+    day: "20",
+    title: "Meetup #1 - Bengaluru",
+    date: "Saturday, 20 September 2025",
+    location: "Green Path Organic Hotel, Malleshwara, Bengaluru",
+    attendees: "Members from Bengaluru, Kalaburgi, Raichur and Hubballi",
+    organiser: "Mundhe Banni",
+    image: "https://mundhebanni.org/meetups/Audience.jpeg",
+    summary: "The first Mundhe Banni meetup brought Karnataka founders together for startup showcases, Q&A, and community feedback.",
+    highlights: ["5 founder demos", "Startup Q&A", "Community suggestions", "Founder networking"]
+  }
 ];
 
-const eventTypeClass = (type) => type.toLowerCase().replaceAll(" ", "-");
+const meetupImpact = {
+  image: "https://mundhebanni.org/meetups/hubli.JPG",
+  title: "Founder Meetups Across Karnataka",
+  built: "6 city meetups across 4 cities of Karnataka",
+  reach: "900+ entrepreneurs gained knowledge and network"
+};
 
 function EventsHeader() {
   return (
     <section className="events-page-header">
       <Breadcrumb items={["Events"]} />
       <div className="events-title-row">
-        <div><h1>Events</h1><p>Founder meetups, community conferences, and flagship Mundhe Banni events across Karnataka.</p></div>
+        <div><h1>Events</h1><p>Founder meetups and community gatherings from Mundhe Banni across Karnataka.</p></div>
         <div className="events-header-side">
-          <div className="events-header-stats"><div><strong>250+</strong><span>Events Conducted</span></div><div><strong>12</strong><span>Upcoming Events</span></div><div><strong>82+</strong><span>Active Groups</span></div></div>
+          <div className="events-header-stats"><div><strong>6</strong><span>City Meetups</span></div><div><strong>4</strong><span>Karnataka Cities</span></div><div><strong>900+</strong><span>Entrepreneurs Reached</span></div></div>
           <a className="button primary" href="/events/create">＋ Create Event</a>
         </div>
       </div>
@@ -1157,63 +1211,52 @@ function EventsHeader() {
   );
 }
 
-function FlagshipEventHero() {
+function PastMeetupCard({ meetup }) {
   return (
-    <section className="flagship-event-hero">
-      <div>
-        <div className="flagship-top"><span>🚀 Flagship Event</span><div className="countdown"><small>Starts in:</small><strong>14<em>Days</em></strong><b>:</b><strong>08<em>Hours</em></strong><b>:</b><strong>32<em>Mins</em></strong></div></div>
-        <h2>Karnataka Startup Summit 2025</h2>
-        <div className="flagship-meta"><span>📅 Fri-Sat, 30-31 May 2025</span><span>📍 NIMHANS Convention Centre, Bangalore</span><span>🎥 In-Person + Live Stream</span></div>
-        <div className="flagship-attendees"><AvatarStack count="+ 428 registered" /></div>
-        <div className="featured-actions"><a className="button primary" href="/events/bengaluru-founder-meetup">Register Now</a><a className="button ghost" href="#schedule">View Full Schedule</a></div>
+    <article className="past-meetup-card">
+      <div className="past-meetup-image" style={{ backgroundImage: `linear-gradient(135deg, rgba(0,0,0,.42), rgba(29,43,83,.2)), url("${meetup.image}")` }}>
+        <div className="event-date"><span>{meetup.month}</span><strong>{meetup.day}</strong></div>
+        <span className="event-type-badge past-meetup">{meetup.type}</span>
       </div>
-      <div className="speaker-preview">{[["KM", "Kiran Mazumdar Shaw", "Building Karnataka's Next Unicorn"], ["ST", "Sachin Taparia", "Community-Led Growth for Startups"], ["VK", "Vani Kola", "What Investors Look for in 2025"]].map(([initials, name, talk]) => <article key={name}><span>{initials}</span><div><strong>{name}</strong><small>{talk}</small></div></article>)}<a href="#speakers">+ 8 more speakers →</a></div>
-    </section>
-  );
-}
-
-function EventsToolbar() {
-  return (
-    <>
-      <section className="events-tabs">
-        <nav>{["All Events", "Upcoming", "My RSVPs", "Past Events"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab}>{tab}</button>)}</nav>
-        <div className="view-toggle"><button className="active" aria-label="Grid view"><Grid3X3 size={17} /></button><button aria-label="List view"><List size={18} /></button></div>
-        <div className="events-filter-row">
-          <div className="resource-search"><Search size={16} /><input placeholder="Search events by name or keyword..." /></div>
-          <label className="select-filter"><span>Type:</span><select><option>All Types</option><option>Group Meetup</option><option>Community Conference</option><option>Flagship Event</option></select></label>
-          <label className="select-filter"><span>Format:</span><select><option>All Formats</option><option>In-Person</option><option>Virtual</option><option>Hybrid</option></select></label>
-          <label className="select-filter"><span>City:</span><select><option>All Cities</option><option>Bengaluru</option><option>Mysuru</option><option>Mangaluru</option></select></label>
-          <label className="select-filter date-filter"><span>Date:</span><input value="May 2025 - Jun 2025" readOnly /></label>
-          <button className="mobile-filter"><Filter size={16} />Filter & Sort</button>
-          <p>Showing 12 upcoming events</p>
-        </div>
-      </section>
-      <section className="event-pills">{["🗓 All Events", "👥 Group Meetups", "🌍 Community Conferences", "🚀 Flagship Events", "💻 Virtual Only"].map((pill, index) => <button className={index === 0 ? "active" : ""} key={pill}>{pill}</button>)}</section>
-    </>
-  );
-}
-
-function EventDirectoryCard({ event }) {
-  const [type, month, day, title, date, location, attendees, organiser, cta, tone] = event;
-  return (
-    <article className={`event-directory-card ${tone === "flagship" ? "featured" : ""}`}>
-      <a className={`event-directory-image ${tone}`} href="/events/bengaluru-founder-meetup">
-        <div className="event-date"><span>{month}</span><strong>{day}</strong></div><span className={`event-type-badge ${eventTypeClass(type)}`}>{type}</span><Bookmark size={18} />
-      </a>
-      <div className="event-directory-body">
-        <a href="/events/bengaluru-founder-meetup"><h3>{title}</h3></a>
-        <p><CalendarDays size={14} />{date}</p><p><MapPin size={14} />{location}</p>
-        <AvatarStack count={`${attendees} attending`} />
-        <div className="event-directory-footer"><span>👤 {organiser}</span><button className={cta === "Get Tickets" ? "filled" : ""}>{cta}</button></div>
-        {title === "Investor Connect Mysuru" && <small className="spots-left">32 spots left</small>}
+      <div className="past-meetup-body">
+        <h3>{meetup.title}</h3>
+        <p><CalendarDays size={14} />{meetup.date}</p>
+        <p><MapPin size={14} />{meetup.location}</p>
+        <p>{meetup.summary}</p>
+        <div className="past-meetup-highlights">{meetup.highlights.map((highlight) => <span key={highlight}>{highlight}</span>)}</div>
+        <small>👥 {meetup.attendees}</small>
       </div>
     </article>
   );
 }
 
+function PastMeetupsSection() {
+  return (
+    <section className="past-meetups-section">
+      <div className="past-meetups-heading">
+        <div>
+          <span>From mundhebanni.org/meetups</span>
+          <h2>Previously Held Meetups</h2>
+          <p>Real Mundhe Banni gatherings and outcomes from the public meetup page.</p>
+        </div>
+        <a href="https://mundhebanni.org/en/meetups" target="_blank" rel="noreferrer">View source page <ArrowUpRight size={14} /></a>
+      </div>
+      <div className="past-meetups-grid">
+        {pastMundheBanniMeetups.map((meetup) => <PastMeetupCard meetup={meetup} key={meetup.title} />)}
+        <article className="meetup-impact-card" style={{ backgroundImage: `linear-gradient(135deg, rgba(5,7,17,.72), rgba(36,86,160,.25)), url("${meetupImpact.image}")` }}>
+          <span>Program impact</span>
+          <h3>{meetupImpact.title}</h3>
+          <p>{meetupImpact.built}</p>
+          <strong>{meetupImpact.reach}</strong>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function EventsPage() {
   return (
-    <><Header /><main><EventsHeader /><FlagshipEventHero /><EventsToolbar /><section className="events-directory-grid">{eventsDirectory.map((event) => <EventDirectoryCard event={event} key={event[3]} />)}<button className="load-more">Load More Events</button></section></main><Footer /></>
+    <><Header /><main><EventsHeader /><PastMeetupsSection /></main><Footer /></>
   );
 }
 
@@ -1265,6 +1308,14 @@ function CreateEventPage() {
 }
 
 const GROUPS_PAGE_SIZE = 9;
+const GROUP_CATEGORY_OPTIONS = [
+  ["sector_based", "Sector-based"],
+  ["geography_based", "Geography-based"],
+  ["women_founders", "Women Founders"],
+  ["students", "Students"],
+  ["investors", "Investors"],
+  ["founder_general", "Founder / General"]
+];
 const GROUP_COLORS = ["#2456A0", "#1A7A4A", "#374151", "#9B3BB5", "#5B3DB5", "#B8760A", "#C84B2F"];
 const GROUP_BANNERS = [
   [["bengaluru-founders", "bengaluru founders"], "/assets/group-bengaluru-founders.png"],
@@ -1302,6 +1353,7 @@ const groupColor = (group) => GROUP_COLORS[Math.abs((group?.name || "").split(""
 const groupPrivacyLabel = (privacy = "public") => privacy === "invite_only" ? "Invite Only" : privacy.charAt(0).toUpperCase() + privacy.slice(1);
 const groupPrivacyIcon = (privacy = "public") => privacy === "private" ? "🔒" : privacy === "invite_only" ? "🔑" : "🔓";
 const groupLocation = (group) => group?.cities?.name || "Karnataka-wide";
+const groupCategoryLabel = (category) => GROUP_CATEGORY_OPTIONS.find(([value]) => value === category)?.[1] || category || "Founder Group";
 const groupBanner = (group) => {
   if (group?.banner_url) return group.banner_url;
   const haystack = `${group?.slug || ""} ${group?.name || ""}`.toLowerCase();
@@ -1388,7 +1440,7 @@ function GroupDirectoryCard({ group, membership, onJoin, onLeave, busy }) {
   const privacy = group.privacy_type || "public";
   const memberCount = groupMemberCount(group);
   const tags = groupTags(group).slice(0, 3);
-  return <article className="group-directory-card" style={{"--group-color":groupColor(group)}}><a className={`group-banner ${groupClass(group.category || group.slug)}`} style={{ backgroundImage: `linear-gradient(to top, rgba(29,43,83,.6), transparent), url("${groupBanner(group)}")` }} href={`/groups/${group.slug}`}><span className={`privacy-badge ${groupClass(groupPrivacyLabel(privacy))}`}>{groupPrivacyIcon(privacy)} {groupPrivacyLabel(privacy)}</span><small>Active</small></a><div className="group-directory-body"><span className="group-directory-logo">{group.logo_url ? <img src={group.logo_url} alt="" /> : groupIcon(group)}</span><a href={`/groups/${group.slug}`}><h3>{group.name}</h3></a><span className={`group-category-badge ${groupClass(group.category || "Founder")}`}>{group.category || "Founder Group"}</span><p>{group.short_description || "A focused community for Karnataka founders."}</p><small>📍 {groupLocation(group)}</small><div className="person-tags group-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}{!tags.length && <span>Community</span>}</div><div className="group-member-row"><AvatarStack count={`${memberCount} Members`}/><span>Created {relativeTime(group.created_at)}</span></div><div className="group-card-footer"><span>💬 Discussions pending</span>{joined ? <button className="joined" disabled={busy} onClick={() => onLeave(group)}>✓ Joined</button> : <button disabled={busy} onClick={() => onJoin(group)}>{privacy === "invite_only" ? "Request to Join" : "Join Group"}</button>}</div></div></article>;
+  return <article className="group-directory-card" style={{"--group-color":groupColor(group)}}><a className={`group-banner ${groupClass(group.category || group.slug)}`} style={{ backgroundImage: `linear-gradient(to top, rgba(29,43,83,.6), transparent), url("${groupBanner(group)}")` }} href={`/groups/${group.slug}`}><span className={`privacy-badge ${groupClass(groupPrivacyLabel(privacy))}`}>{groupPrivacyIcon(privacy)} {groupPrivacyLabel(privacy)}</span><small>Active</small></a><div className="group-directory-body"><span className="group-directory-logo">{group.logo_url ? <img src={group.logo_url} alt="" /> : groupIcon(group)}</span><a href={`/groups/${group.slug}`}><h3>{group.name}</h3></a><span className={`group-category-badge ${groupClass(group.category || "Founder")}`}>{groupCategoryLabel(group.category)}</span><p>{group.short_description || "A focused community for Karnataka founders."}</p><small>📍 {groupLocation(group)}</small><div className="person-tags group-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}{!tags.length && <span>Community</span>}</div><div className="group-member-row"><AvatarStack count={`${memberCount} Members`}/><span>Created {relativeTime(group.created_at)}</span></div><div className="group-card-footer"><span>💬 Discussions pending</span>{joined ? <button className="joined" disabled={busy} onClick={() => onLeave(group)}>✓ Joined</button> : <button disabled={busy} onClick={() => onJoin(group)}>{privacy === "invite_only" ? "Request to Join" : "Join Group"}</button>}</div></div></article>;
 }
 
 function GroupsLoadingState() {
@@ -1538,6 +1590,27 @@ function CreateGroupPage() {
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
   const toggleTag = (tagId) => setSelectedTags((current) => current.includes(tagId) ? current.filter((id) => id !== tagId) : [...current, tagId]);
+  const createGroupRecord = async (basePayload) => {
+    const fallbacksByCategory = {
+      sector_based: ["sector_based", "sector", "industry", "general", null],
+      geography_based: ["geography_based", "geography", "location", "city", "general", null],
+      women_founders: ["women_founders", "women", "general", null],
+      students: ["students", "student", "general", null],
+      investors: ["investors", "investor", "general", null],
+      founder_general: ["founder_general", "general", null]
+    };
+    const candidates = [...new Set(fallbacksByCategory[basePayload.category] || [basePayload.category, "general", null])];
+    let lastError = null;
+    for (const category of candidates) {
+      const payload = { ...basePayload, category };
+      const result = await supabase.from("groups").insert(payload).select().single();
+      if (!result.error) return result;
+      lastError = result.error;
+      const isCategoryCheck = result.error.message?.includes("groups_category_check") || result.error.code === "23514";
+      if (!isCategoryCheck) return result;
+    }
+    return { data: null, error: lastError };
+  };
   const submit = async (event) => {
     event.preventDefault();
     if (!user) {
@@ -1548,7 +1621,7 @@ function CreateGroupPage() {
     setMessage(null);
     const baseSlug = slugify(form.name);
     const slug = `${baseSlug}-${Date.now().toString(36).slice(-4)}`;
-    const { data: newGroup, error } = await supabase.from("groups").insert({
+    const { data: newGroup, error } = await createGroupRecord({
       slug,
       name: form.name,
       short_description: form.short_description,
@@ -1561,7 +1634,7 @@ function CreateGroupPage() {
       file_upload_permission: filePermission,
       created_by: user.id,
       status: "pending"
-    }).select().single();
+    });
     if (error) {
       setMessage({ type: "error", text: error.message || "Could not submit this group." });
       setSubmitting(false);
@@ -1581,7 +1654,7 @@ function CreateGroupPage() {
   if (loading) return <><Header/><main className="create-group-page"><p>Loading...</p></main><Footer/></>;
   if (!user) return <><Header/><main className="profile-signed-out"><Lock size={34}/><h1>Log in to create a group</h1><p>Group submissions are tied to your Mundhe Banni profile.</p><a className="button primary" href="/login">Log In</a></main><Footer/></>;
 
-  return <><Header/><main className="create-group-page"><Breadcrumb items={["Groups","Create Group"]}/><h1>Create a New Group</h1><p>Groups are reviewed and approved by the Mundhe Banni admin team before going live.</p><div className="info-note">ℹ️ Your group submission will be reviewed. You'll receive an email once approved. You can use the platform normally while your group is pending review.</div><form className="upload-form" onSubmit={submit}><UploadSection title="Group Identity"><label>Group Name *<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="e.g. Bengaluru SaaS Founders" required/></label><label>Short Description *<input value={form.short_description} onChange={(event) => update("short_description", event.target.value)} placeholder="One line - what is this group about?" required/></label><label>Full Description<textarea value={form.full_description} onChange={(event) => update("full_description", event.target.value)} placeholder="Describe the group's purpose, who should join, and what members can expect."/></label><label>Category *<select value={form.category} onChange={(event) => update("category", event.target.value)} required><option value="">Select...</option><option>Sector-based</option><option>Geography-based</option><option>Women Founders</option><option>Founder / General</option></select></label><label>City / Region<select value={form.city_id} onChange={(event) => update("city_id", event.target.value)}><option value="">Karnataka-wide</option>{meta.cities.map((city) => <option value={city.id} key={city.id}>{city.name}</option>)}</select></label></UploadSection><UploadSection title="Branding"><label>Group Logo<div className="dropzone compact">Storage upload will be connected next. Submit without a logo for now.</div></label><label>Banner Image<div className="dropzone compact">Storage upload will be connected next. Submit without a banner for now.</div></label></UploadSection><UploadSection title="Privacy & Settings"><div className="privacy-selector">{[["🔓","public","Public","Anyone can find and join"],["🔒","private","Private","Auto-approved for this testing phase"],["🔑","invite_only","Invite Only","Request notification sent to admins"]].map(([icon,value,title,desc])=><label className={privacy===value?"selected":""} key={value}><input type="radio" name="privacy" checked={privacy===value} onChange={() => setPrivacy(value)}/>{icon}<strong>{title}</strong><small>{desc}</small></label>)}</div><label>Who can upload files?<div className="format-radios"><label><input type="radio" name="files" checked={filePermission==="admin_only"} onChange={() => setFilePermission("admin_only")}/>Group Admin only</label><label><input type="radio" name="files" checked={filePermission==="members"} onChange={() => setFilePermission("members")}/>All members</label></div></label><label>Interest Tags<div className="industry-pills selectable">{meta.tags.slice(0, 14).map((tag)=><button type="button" className={selectedTags.includes(tag.id)?"selected":""} onClick={() => toggleTag(tag.id)} key={tag.id}>{tag.label}</button>)}</div></label></UploadSection><UploadSection title="Community Rules (Optional)">{rules.map((rule,index)=><div className="rule-row" key={index}><span>{index+1}.</span><input value={rule} onChange={(event) => setRules((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}/><button type="button" onClick={() => setRules((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button></div>)}<button className="button secondary" type="button" onClick={() => setRules((current) => [...current, ""])}>Add Rule</button></UploadSection>{message && <div className={`form-message ${message.type}`}>{message.text}</div>}<div className="submit-row"><button type="button">Save as Draft</button><button type="submit" disabled={submitting}>{submitting ? "Submitting..." : "Submit for Review →"}</button><small>By creating a group you agree to Mundhe Banni's <a href="#guidelines">Community Guidelines</a>.</small></div></form></main></>;
+  return <><Header/><main className="create-group-page"><Breadcrumb items={["Groups","Create Group"]}/><h1>Create a New Group</h1><p>Groups are reviewed and approved by the Mundhe Banni admin team before going live.</p><div className="info-note">ℹ️ Your group submission will be reviewed. You'll receive an email once approved. You can use the platform normally while your group is pending review.</div><form className="upload-form" onSubmit={submit}><UploadSection title="Group Identity"><label>Group Name *<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="e.g. Bengaluru SaaS Founders" required/></label><label>Short Description *<input value={form.short_description} onChange={(event) => update("short_description", event.target.value)} placeholder="One line - what is this group about?" required/></label><label>Full Description<textarea value={form.full_description} onChange={(event) => update("full_description", event.target.value)} placeholder="Describe the group's purpose, who should join, and what members can expect."/></label><label>Category *<select value={form.category} onChange={(event) => update("category", event.target.value)} required><option value="">Select...</option>{GROUP_CATEGORY_OPTIONS.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>City / Region<select value={form.city_id} onChange={(event) => update("city_id", event.target.value)}><option value="">Karnataka-wide</option>{meta.cities.map((city) => <option value={city.id} key={city.id}>{city.name}</option>)}</select></label></UploadSection><UploadSection title="Branding"><label>Group Logo<div className="dropzone compact">Storage upload will be connected next. Submit without a logo for now.</div></label><label>Banner Image<div className="dropzone compact">Storage upload will be connected next. Submit without a banner for now.</div></label></UploadSection><UploadSection title="Privacy & Settings"><div className="privacy-selector">{[["🔓","public","Public","Anyone can find and join"],["🔒","private","Private","Auto-approved for this testing phase"],["🔑","invite_only","Invite Only","Request notification sent to admins"]].map(([icon,value,title,desc])=><label className={privacy===value?"selected":""} key={value}><input type="radio" name="privacy" checked={privacy===value} onChange={() => setPrivacy(value)}/>{icon}<strong>{title}</strong><small>{desc}</small></label>)}</div><label>Who can upload files?<div className="format-radios"><label><input type="radio" name="files" checked={filePermission==="admin_only"} onChange={() => setFilePermission("admin_only")}/>Group Admin only</label><label><input type="radio" name="files" checked={filePermission==="members"} onChange={() => setFilePermission("members")}/>All members</label></div></label><label>Interest Tags<div className="industry-pills selectable">{meta.tags.slice(0, 14).map((tag)=><button type="button" className={selectedTags.includes(tag.id)?"selected":""} onClick={() => toggleTag(tag.id)} key={tag.id}>{tag.label}</button>)}</div></label></UploadSection><UploadSection title="Community Rules (Optional)">{rules.map((rule,index)=><div className="rule-row" key={index}><span>{index+1}.</span><input value={rule} onChange={(event) => setRules((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}/><button type="button" onClick={() => setRules((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button></div>)}<button className="button secondary" type="button" onClick={() => setRules((current) => [...current, ""])}>Add Rule</button></UploadSection>{message && <div className={`form-message ${message.type}`}>{message.text}</div>}<div className="submit-row"><button type="button">Save as Draft</button><button type="submit" disabled={submitting}>{submitting ? "Submitting..." : "Submit for Review →"}</button><small>By creating a group you agree to Mundhe Banni's <a href="#guidelines">Community Guidelines</a>.</small></div></form></main></>;
 }
 
 function Hero() {
@@ -1717,7 +1790,8 @@ function Resources() {
 }
 
 function CommunityPage() {
-  const [loginOpen, setLoginOpen] = React.useState(false);
+  const { user } = useAuth();
+  const [composerOpen, setComposerOpen] = React.useState(false);
   const [activeCategory, setActiveCategory] = React.useState("All");
   const [query, setQuery] = React.useState("");
   const [sort, setSort] = React.useState("latest.json?page=0");
@@ -1732,6 +1806,13 @@ function CommunityPage() {
   const topics = activeCategory === "All" ? allTopics : allTopics.filter((topic) => categoryMap.get(topic.category_id)?.name === activeCategory);
   const offline = Boolean(categoriesState.error || topicsState.error || statsState.error);
   const searchResults = query.trim() ? topics.filter((topic) => topic.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [];
+  const startDiscussion = () => {
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent("/community")}`;
+      return;
+    }
+    setComposerOpen(true);
+  };
 
   return (
     <>
@@ -1743,7 +1824,7 @@ function CommunityPage() {
             <div><h1>Community Discussions</h1><p>Ask questions, share ideas, and learn from 5,200+ Karnataka founders.</p></div>
             <div className="community-actions">
               <a className="forum-link" href={discourseBaseUrl}>Go to Full Forum <ArrowUpRight size={14} /></a>
-              <button onClick={() => setLoginOpen(true)}>+ Start Discussion</button>
+              <button onClick={startDiscussion}>+ Start Discussion</button>
               <small className={offline ? "offline" : ""}><i></i>{offline ? "Forum offline - showing cached content" : "Forum live · Powered by Discourse"}</small>
             </div>
           </div>
@@ -1751,7 +1832,7 @@ function CommunityPage() {
         {offline && <div className="community-warning">⚠️ Could not load live discussions. Showing cached content while the forum is unavailable.</div>}
         <CommunityStats stats={statsState.data} loading={statsState.isLoading} offline={Boolean(statsState.error)} />
         <section className="community-tabs">
-          <nav>{["All", "Featured", "My Groups", "Following"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab} onClick={() => index > 1 && setLoginOpen(true)}>{tab}{tab === "My Groups" && <span>3 new</span>}</button>)}</nav>
+          <nav>{["All", "Featured", "My Groups", "Following"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab} onClick={() => index > 1 && !user && (window.location.href = `/login?next=${encodeURIComponent("/community")}`)}>{tab}{tab === "My Groups" && <span>3 new</span>}</button>)}</nav>
           <label className="select-filter"><span>Sort:</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="latest.json?page=0">Latest</option><option value="top.json?period=all">Most Liked</option><option value="top.json?period=weekly">Trending</option><option value="latest.json?filter=unsolved">Unanswered</option></select></label>
           <div className="view-toggle"><button aria-label="Grid view"><Grid3X3 size={16} /></button><button className="active" aria-label="List view"><List size={17} /></button></div>
         </section>
@@ -1761,13 +1842,13 @@ function CommunityPage() {
         </section>
         <section className="community-layout">
           <CommunityLeftRail categories={categories} activeCategory={activeCategory} onCategory={setActiveCategory} loading={categoriesState.isLoading} />
-          <CommunityFeed topics={topics} categories={categoryMap} loading={topicsState.isLoading} offline={Boolean(topicsState.error)} onLogin={() => setLoginOpen(true)} />
+          <CommunityFeed topics={topics} categories={categoryMap} loading={topicsState.isLoading} offline={Boolean(topicsState.error)} onLogin={startDiscussion} />
           <CommunityRightRail topics={trendingState.data?.topic_list?.topics || fallbackCommunityTopics} categories={categoryMap} />
         </section>
       </main>
       <Footer />
-      <button className="community-mobile-start" onClick={() => setLoginOpen(true)}>+ Start Discussion</button>
-      {loginOpen && <LoginPlaceholderModal onClose={() => setLoginOpen(false)} />}
+      <button className="community-mobile-start" onClick={startDiscussion}>+ Start Discussion</button>
+      {composerOpen && <NewDiscussionModal categories={categories} user={user} onClose={() => setComposerOpen(false)} />}
     </>
   );
 }
@@ -1832,7 +1913,7 @@ function CommunityTopicRow({ topic, category, onLogin }) {
         <div className="topic-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
         <small><b>{author}</b> · {relativeTime(topic.last_posted_at || topic.created_at)} · <button>Quick Preview</button></small>
       </div>
-      <aside><span>💬 {topic.posts_count || 0}</span><span>👁 {topic.views || 0}</span><span>▲ {topic.like_count || 0}</span><button onClick={onLogin} aria-label="Save topic"><Bookmark size={16} /></button></aside>
+      <aside><span>💬 {topic.posts_count || 0}</span><span>👁 {topic.views || 0}</span><span>▲ {topic.like_count || 0}</span><a href={topicUrl(topic)} aria-label="Open topic"><Bookmark size={16} /></a></aside>
     </article>
   );
 }
@@ -1855,6 +1936,65 @@ function CommunityRightRail({ topics, categories }) {
 
 function CommunityWidget({ title, children }) {
   return <div className="community-widget"><h2>{title}</h2>{children}</div>;
+}
+
+function NewDiscussionModal({ categories, user, onClose }) {
+  const [title, setTitle] = React.useState("");
+  const [raw, setRaw] = React.useState("");
+  const [categoryId, setCategoryId] = React.useState(categories.find((category) => category.name === "General")?.id || categories[0]?.id || "");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const submit = async (event) => {
+    event.preventDefault();
+    setError("");
+    if (title.trim().length < 15) {
+      setError("Please add a clear title with at least 15 characters.");
+      return;
+    }
+    if (raw.trim().length < 20) {
+      setError("Please add a few more details before posting.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/discourse/posts.json", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          raw: `${raw.trim()}\n\n_Posted from Mundhe Banni by ${user?.email || "a member"}._`,
+          category: categoryId ? Number(categoryId) : undefined
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(data.errors?.join(" ") || data.error || "Could not publish this discussion to Discourse.");
+        setSubmitting(false);
+        return;
+      }
+      const topicId = data.topic_id || data.topic?.id;
+      const topicSlug = data.topic_slug || data.topic?.slug || "topic";
+      window.location.href = topicId ? `${discourseBaseUrl}/t/${topicSlug}/${topicId}` : discourseNewTopicUrl;
+    } catch {
+      setError("Could not reach Discourse. Try again in a moment.");
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="new-discussion-title">
+      <form className="community-login-modal discussion-composer" onSubmit={submit}>
+        <button type="button" className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
+        <h2 id="new-discussion-title">Start a Discussion</h2>
+        <p>This will create a topic in the Mundhe Banni Discourse forum using the server-side integration.</p>
+        <label>Title<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What do you want to discuss?" autoFocus required /></label>
+        <label>Category<select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
+        <label>Message<textarea value={raw} onChange={(event) => setRaw(event.target.value)} placeholder="Add context, question, or details for the community..." required /></label>
+        {error && <div className="login-error" role="alert"><strong>{error}</strong></div>}
+        <button className="primary-login" type="submit" disabled={submitting}>{submitting ? "Posting..." : "Post Discussion"}</button>
+      </form>
+    </div>
+  );
 }
 
 function SkeletonList({ rows = 3 }) {
