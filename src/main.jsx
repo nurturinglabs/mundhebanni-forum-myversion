@@ -86,11 +86,11 @@ const providers = [
 ];
 
 const resources = [
-  [FileText, "Startup Templates", "100+ Templates", "blue"],
-  [TrendingUp, "Pitch Deck Examples", "50+ Decks", "purple"],
-  [Landmark, "Funding Guides", "Step-by-step guides", "green"],
-  [CheckCircle2, "Legal Checklists", "Essential for Startups", "teal"],
-  [FileText, "Market Research Reports", "Industry Insights", "red"]
+  [Landmark, "DPIIT Recognition", "Register as a startup", "green"],
+  [FileText, "Founder Checklists", "Legal, tax and GTM", "blue"],
+  [TrendingUp, "Funding & Grants", "Startup India and Elevate", "purple"],
+  [CheckCircle2, "Compliance Basics", "MCA, GST and Udyam", "teal"],
+  [BookOpen, "Kannada Learning", "Beginner-friendly guides", "red"]
 ];
 
 function Logo() {
@@ -149,31 +149,38 @@ function Header() {
 }
 
 const resourceCategories = [
-  ["📚", "All Resources", 124],
-  ["📘", "eBooks", 28],
-  ["📄", "Whitepapers", 19],
-  ["🖼️", "Infographics", 15],
-  ["🎬", "Videos", 22],
-  ["🎙️", "Webinars", 18],
-  ["📋", "Case Studies", 14],
-  ["🎧", "Podcasts", 8]
+  ["📚", "All Resources", 12],
+  ["🚀", "Startup Basics", 3],
+  ["🏛️", "Govt Schemes", 3],
+  ["⚖️", "Legal & Tax", 3],
+  ["📈", "Growth", 2],
+  ["ಕ", "Kannada", 1]
 ];
 
 const resourceCards = [
-  ["eBook", "The Founder's Fundraising Handbook", "A practical playbook for preparing, pitching, and closing early-stage capital.", "Mundhe Banni Team", "Jan 2025", ["Fundraising", "Finance"], "3.8K", "4.9", "Open"],
-  ["Whitepaper", "Karnataka Startup Ecosystem Report 2025", "Funding trends, sector growth, and founder insights across Karnataka.", "KCG Research", "Feb 2025", ["Ecosystem", "Strategy"], "3.2K", "4.8", "Gated"],
-  ["Video", "How to Build a Pitch Deck That Converts", "A focused walkthrough of deck structure, narrative, and investor questions.", "Ravi Shenoy", "Mar 2025", ["Fundraising", "Product"], "2.1K", "4.7", "Open"],
-  ["Case Study", "Agritech Scale-Up: From 0 to 10K Farmers", "How an agritech team built trust, operations, and distribution at scale.", "GreenRoot Team", "Dec 2024", ["Agritech", "Operations"], "1.4K", "4.6", "Open"],
-  ["Infographic", "India Startup Funding Map 2024", "A visual snapshot of startup funding by region, stage, and sector.", "Mundhe Banni Research", "Nov 2024", ["Fundraising", "Ecosystem"], "5.1K", "4.5", "Open"],
-  ["Webinar", "ESOP Basics for Early Stage Founders", "Legal and HR essentials founders should understand before issuing ESOPs.", "LegalEdge Associates", "Mar 2025", ["Legal", "HR"], "980", "4.8", "Gated"],
-  ["Podcast", "Building in Bharat — Episode 12: SaaS GTM", "A founder conversation on selling SaaS from India to global customers.", "Mundhe Banni FM", "Apr 2025", ["Product", "Marketing"], "760", "4.6", "Open"],
-  ["eBook", "Legal Checklist for Startups — India Edition", "Company, compliance, contracts, and IP checkpoints for Indian startups.", "LegalEdge", "Feb 2025", ["Legal", "Compliance"], "2.9K", "4.9", "Open"],
-  ["Case Study", "How FinTax Helped 3 Startups Raise Series A", "Finance hygiene, investor readiness, and reporting practices that worked.", "FinTax Team", "Jan 2025", ["Finance", "Fundraising"], "1.1K", "4.7", "Gated"]
+  ["Official Guide", "DPIIT Startup Recognition", "Apply for Startup India recognition so your venture can access tax, tender, IPR and scheme benefits.", "Startup India", "Official", ["Startup Basics", "DPIIT"], "Official portal", "Beginner", "Open", "https://www.startupindia.gov.in/content/sih/en/startup-scheme.html"],
+  ["Scheme", "Startup India Seed Fund Scheme", "Understand eligibility and application flow for seed funding support through approved incubators.", "Startup India", "Official", ["Funding", "Seed"], "Government scheme", "Early stage", "Open", "https://seedfund.startupindia.gov.in/"],
+  ["Scheme", "Karnataka Startup Cell", "Official state startup portal for Karnataka founders looking for programs, grants, events and ecosystem support.", "Government of Karnataka", "Official", ["Funding", "Karnataka"], "State portal", "Karnataka", "Open", "https://startup.karnataka.gov.in/"],
+  ["Checklist", "Company Incorporation Checklist", "What founders should prepare before private limited or LLP registration: name, directors, DSC, DIN and documents.", "Mundhe Banni Curated", "Checklist", ["Legal", "MCA"], "Founder checklist", "Beginner", "Open", "https://www.mca.gov.in/content/mca/global/en/mca/e-filing/incorporation.html"],
+  ["Official Guide", "Udyam MSME Registration", "Register eligible micro and small businesses under Udyam for MSME recognition and related benefits.", "Ministry of MSME", "Official", ["MSME", "Registration"], "Official portal", "Small business", "Open", "https://udyamregistration.gov.in/"],
+  ["Official Guide", "GST Registration Basics", "Use the GST registration page to start the registration flow and understand what business details are required.", "GST Portal", "Official", ["GST", "Tax"], "Registration page", "Compliance", "Open", "https://services.gst.gov.in/services/quicklinks/registration"],
+  ["Guide", "Startup India Guidebook", "A broad founder guide covering ideation, registration, tax, funding, incubation and support programs in India.", "Startup India", "Official", ["Startup Basics", "Guidebook"], "Founder guide", "Beginner", "Open", "https://www.startupindia.gov.in/content/sih/en/reources/knowledge-bank.html"],
+  ["Template", "Pitch Deck Structure", "A practical deck outline covering problem, solution, market, traction, business model, team and ask.", "Mundhe Banni Curated", "Template", ["Fundraising", "Pitch"], "Template guide", "Fundraising", "Open", "https://www.ycombinator.com/library/4T-how-to-create-your-seed-round-pitch-deck"],
+  ["Checklist", "India Go-To-Market Guide", "A practical launch guide for choosing a market, validating channels and planning early customer acquisition.", "Startup India", "Official", ["Marketing", "Sales"], "Action guide", "Growth", "Open", "https://www.startupindia.gov.in/content/sih/en/international/go-to-market-guide.html"],
+  ["Official Guide", "Intellectual Property for Startups", "Learn the basics of patents, trademarks, copyright and Startup India IPR support options.", "Startup India", "Official", ["IPR", "Legal"], "Official guide", "Founder", "Open", "https://www.startupindia.gov.in/content/sih/en/intellectual-property-rights.html"],
+  ["Guide", "Financial Model Basics", "Understand what to track before fundraising: revenue, gross margin, burn, runway, CAC, payback and hiring plan.", "Mundhe Banni Curated", "Guide", ["Finance", "Planning"], "Founder guide", "Beginner", "Open", "https://www.score.org/resource/template/financial-projections-template"],
+  ["Kannada Guide", "Business Basics in Kannada", "Kannada founder conversations and practical business stories from the Mundhe Banni community.", "Mundhe Banni", "Kannada", ["Kannada", "Basics"], "Kannada-friendly", "Beginner", "Open", "https://www.youtube.com/@MundheBanni"]
 ];
 
 const typeIcons = {
   eBook: BookOpen,
   Whitepaper: FileText,
+  "Official Guide": Landmark,
+  Scheme: Landmark,
+  Checklist: CheckCircle2,
+  Template: FileText,
+  Guide: BookOpen,
+  "Kannada Guide": BookOpen,
   Video,
   Webinar: Users,
   "Case Study": CheckCircle2,
@@ -295,7 +302,7 @@ function ResourcePageHeader() {
       <div className="resources-title-row">
         <div>
           <h1>Resource Library</h1>
-          <p>Curated guides, templates, whitepapers and videos to help your startup grow.</p>
+          <p>Practical official links, checklists and founder guides for building a business in Karnataka.</p>
         </div>
         {["SME", "Admin"].includes(role) && <a className="button primary" href="/resources/upload"><Upload size={17} />Upload Resource</a>}
       </div>
@@ -318,16 +325,16 @@ function ResourceToolbar() {
     <section className="resource-toolbar">
       <div className="resource-search"><Search size={16} /><input placeholder="Search resources, topics, authors..." /></div>
       {[
-        ["Type:", ["All Types", "eBook", "Whitepaper", "Infographic", "Video", "Webinar", "Case Study", "Podcast", "Datasheet"]],
-        ["Topic:", ["All Topics", "Fundraising", "Product", "Legal", "Marketing", "Operations", "Technology", "Finance", "HR"]],
+        ["Type:", ["All Types", "Official Guide", "Scheme", "Checklist", "Template", "Guide", "Kannada Guide"]],
+        ["Topic:", ["All Topics", "Startup Basics", "Funding", "Legal", "GST", "MSME", "Marketing", "Finance", "Kannada"]],
         ["Language:", ["All Languages", "English", "Kannada"]],
-        ["Sort:", ["Relevance", "Newest First", "Most Downloaded", "Top Rated"]]
+        ["Stage:", ["All Stages", "Idea", "Early Stage", "Compliance", "Growth", "Fundraising"]]
       ].map(([label, options]) => (
         <label className="select-filter" key={label}><span>{label}</span><select>{options.map((option) => <option key={option}>{option}</option>)}</select></label>
       ))}
       <button className="mobile-filter"><Filter size={16} />Filter & Sort</button>
       <div className="view-toggle"><button className="active" aria-label="Grid view"><Grid3X3 size={17} /></button><button aria-label="List view"><List size={18} /></button></div>
-      <p>Showing 124 resources</p>
+      <p>Showing {resourceCards.length} curated resources</p>
     </section>
   );
 }
@@ -337,14 +344,14 @@ function FeaturedResource() {
     <section className="featured-resource">
       <div>
         <span className="featured-pill">★ Featured Resource</span>
-        <h2>Karnataka Startup Ecosystem Report 2025</h2>
-        <p>A comprehensive analysis of funding trends, sector growth, and founder insights from Karnataka's startup ecosystem over the last 12 months.</p>
-        <div className="featured-meta"><span>📄 Whitepaper</span><span>⬇ 3,240 Downloads</span><span>★ 4.8 Rating</span></div>
-        <div className="featured-actions"><button className="button primary"><Download size={17} />Download Free</button><button className="button ghost"><Eye size={17} />Quick Preview</button></div>
+        <h2>Founder Starter Kit for Karnataka</h2>
+        <p>Start here if you are setting up a business: DPIIT recognition, Udyam, GST, incorporation, seed funding and founder checklists in one curated library.</p>
+        <div className="featured-meta"><span>📄 Official links</span><span>✅ Founder checklists</span><span>ಕ Kannada-friendly</span></div>
+        <div className="featured-actions"><a className="button primary" href="https://www.startupindia.gov.in/content/sih/en/startup-scheme.html" target="_blank" rel="noreferrer"><ArrowUpRight size={17} />Open DPIIT Guide</a><a className="button ghost" href="#resources-list"><Eye size={17} />Browse Kit</a></div>
       </div>
       <div className="report-cover">
-        <small>Mundhe Banni Research</small>
-        <strong>Karnataka Startup Ecosystem Report 2025</strong>
+        <small>Mundhe Banni Curated</small>
+        <strong>Founder Starter Kit</strong>
         <div className="cover-chart"><span></span><span></span><span></span><span></span></div>
       </div>
     </section>
@@ -354,11 +361,10 @@ function FeaturedResource() {
 function ResourceSidebar() {
   return (
     <aside className="resource-sidebar">
-      <FilterGroup title="Format" items={["PDF", "Video", "Audio"]} checked={["PDF"]} />
-      <FilterGroup title="Topic" items={["Fundraising", "Product Building", "Legal & Compliance", "Marketing & Growth", "Operations", "Technology", "Finance", "Human Resources"]} checked={["Fundraising", "Legal & Compliance"]} showMore />
-      <div className="filter-group"><h3>Date Published</h3>{["Any time", "Last 30 days", "Last 3 months", "Last year"].map((item, index) => <label key={item}><input type="radio" name="date" defaultChecked={index === 0} />{item}</label>)}</div>
-      <div className="filter-group"><h3>Minimum Rating</h3><div className="rating-select">★★★★<span>★</span></div><p>4★ & above</p></div>
-      <FilterGroup title="Language" items={["English", "Kannada"]} checked={["English"]} />
+      <FilterGroup title="Resource Type" items={["Official Guide", "Scheme", "Checklist", "Template", "Guide"]} checked={["Official Guide", "Checklist"]} />
+      <FilterGroup title="Topic" items={["Startup Basics", "Funding", "Legal & Compliance", "GST & Tax", "MSME", "Marketing & Sales", "Finance", "Kannada"]} checked={["Startup Basics", "Funding"]} showMore />
+      <div className="filter-group"><h3>Founder Stage</h3>{["Idea", "Registration", "Early Stage", "Fundraising", "Growth"].map((item, index) => <label key={item}><input type="radio" name="stage" defaultChecked={index === 0} />{item}</label>)}</div>
+      <FilterGroup title="Source" items={["Official", "Mundhe Banni Curated", "External Expert"]} checked={["Official"]} />
       <button className="clear-filters">Clear all filters</button>
     </aside>
   );
@@ -375,7 +381,7 @@ function FilterGroup({ title, items, checked = [], showMore = false }) {
 }
 
 function ResourceCard({ resource, onGate }) {
-  const [type, title, description, author, date, tags, downloads, rating, access] = resource;
+  const [type, title, description, author, sourceLabel, tags, primaryMeta, secondaryMeta, access, url] = resource;
   const Icon = typeIcons[type] || FileText;
   return (
     <article className="library-card">
@@ -385,13 +391,13 @@ function ResourceCard({ resource, onGate }) {
         <Icon size={54} />
       </div>
       <div className="library-card-body">
-        <a href="/resources/the-founders-fundraising-handbook"><h3>{title}</h3></a>
+        <a href={url} target="_blank" rel="noreferrer"><h3>{title}</h3></a>
         <p>{description}</p>
-        <div className="resource-byline"><span>{author}</span><time>{date}</time></div>
+        <div className="resource-byline"><span>{author}</span><time>{sourceLabel}</time></div>
         <div className="tag-row">{tags.slice(0, 2).map((tag) => <span key={tag}>{tag}</span>)}{tags.length > 2 && <small>+{tags.length - 2} more</small>}</div>
         <div className="resource-card-footer">
-          <div><span>⬇ {downloads}</span><span>★ {rating}</span></div>
-          {access === "Gated" ? <button className="access-outline" onClick={() => onGate(title)}><Lock size={13} />Get Access</button> : <button className="access-filled"><Download size={13} />Download</button>}
+          <div><span>{primaryMeta}</span><span>{secondaryMeta}</span></div>
+          {access === "Gated" ? <button className="access-outline" onClick={() => onGate(title)}><Lock size={13} />Get Access</button> : <a className="access-filled" href={url} target="_blank" rel="noreferrer"><ArrowUpRight size={13} />Open</a>}
         </div>
       </div>
     </article>
@@ -432,10 +438,7 @@ function ResourceLibraryPage() {
         <section className="resource-main">
           <ResourceSidebar />
           <div className="resource-results">
-            <div className="library-grid">{resourceCards.map((resource) => <ResourceCard key={resource[1]} resource={resource} onGate={setGatedResource} />)}</div>
-            <nav className="pagination" aria-label="Resources pagination">
-              {["‹", "1", "2", "3", "...", "11", "›"].map((item) => <button className={item === "1" ? "active" : ""} key={item}>{item}</button>)}
-            </nav>
+            <div className="library-grid" id="resources-list">{resourceCards.map((resource) => <ResourceCard key={resource[1]} resource={resource} onGate={setGatedResource} />)}</div>
           </div>
         </section>
       </main>
@@ -1175,26 +1178,80 @@ function MyListingPage() {
 
 const pastMundheBanniMeetups = [
   {
-    type: "Past Meetup",
+    date: "4:00 PM to 7:00 PM, June 5, 2026",
+    month: "JUN",
+    day: "05",
+    status: "upcoming",
+    city: "Mysuru",
+    imageTone: "mysuru",
+    attendees: "250+",
+    title: "6th Mundhe Banni Meetup @ Mysuru",
+    collaboration: "In collaboration with SJCE STEP",
+    location: "JSS Technical Institutions Campus, Mysuru",
+    summary: "A landmark evening at SJCE STEP, Mysuru - 250+ founders, students, and ecosystem enablers from across Karnataka came together for keynotes, a GTM strategy masterclass, a panel on Mysuru's startup ecosystem, and a founder spotlight featuring local entrepreneurs."
+  },
+  {
+    date: "10:00 AM to 1:30 PM, April 17, 2026",
+    month: "APR",
+    day: "17",
+    status: "upcoming",
+    city: "Tumkur",
+    imageTone: "tumkur-fifth",
+    attendees: "120+",
+    title: "5th Mundhe Banni Meetup @ Tumkur",
+    collaboration: "In collaboration with Siddhaganga Incubation Foundation",
+    location: "Media Centre, SIT Tumkur",
+    summary: "An impactful morning featuring a powerful entrepreneurial journey by Shashi Kumar from Akshayakalpa and a highly practical session on e-commerce growth by Sachin Naik from Cuzor Labs. 120+ participants from Tumkur and nearby regions."
+  },
+  {
+    date: "4pm to 7.30pm, February 28, 2026",
+    month: "FEB",
+    day: "28",
+    status: "past",
+    city: "Bengaluru",
+    imageTone: "bengaluru-fourth",
+    attendees: "100+",
+    title: "4th Mundhe Banni Meetup @ Bengaluru",
+    location: "Bengaluru Design Centre (Cobalt), Church Street",
+    summary: "A highly successful evening featuring expert sessions on fundraising by Vittal Ramakrishna and go-to-market strategy by Jyothirmayee, plus a competitive pitchathon judged by Kailashnath MS from Ideaspring Capital."
+  },
+  {
+    date: "December 19, 2025",
+    month: "DEC",
+    day: "19",
+    status: "past",
+    city: "Hubballi",
+    imageTone: "hubballi",
+    attendees: "250+",
+    title: "3rd Mundhe Banni Meetup @ Hubballi",
+    location: "KLE Technological University, CTIE Campus, Hubballi",
+    summary: "Celebrating the spirit of entrepreneurship in North Karnataka with sessions on brand building and venture funding."
+  },
+  {
+    date: "October 31, 2025",
+    month: "OCT",
+    day: "31",
+    status: "past",
+    city: "Bengaluru",
+    imageTone: "bengaluru",
+    attendees: "100+",
+    title: "2nd Mundhe Banni Meetup @ Bengaluru",
+    location: "Samagata Foundation, M G Road, Bengaluru",
+    summary: "Mundhe Banni celebrated Karnataka Rajyotsava with 100+ entrepreneurs from across Karnataka. The event featured an insightful panel discussion on branding for startups and a competitive pitch competition with five innovative ventures."
+  },
+  {
+    date: "September 19, 2025",
     month: "SEP",
-    day: "20",
+    day: "19",
+    status: "past",
+    city: "Bengaluru",
+    imageTone: "bengaluru-first",
+    attendees: "50+",
     title: "Meetup #1 - Bengaluru",
-    date: "Saturday, 20 September 2025",
-    location: "Green Path Organic Hotel, Malleshwara, Bengaluru",
-    attendees: "Members from Bengaluru, Kalaburgi, Raichur and Hubballi",
-    organiser: "Mundhe Banni",
-    image: "https://mundhebanni.org/meetups/Audience.jpeg",
-    summary: "The first Mundhe Banni meetup brought Karnataka founders together for startup showcases, Q&A, and community feedback.",
-    highlights: ["5 founder demos", "Startup Q&A", "Community suggestions", "Founder networking"]
+    location: "Green Path Organic Hotel, Malleshwaram, Bengaluru",
+    summary: "Our inaugural meetup brought together entrepreneurs from across Karnataka."
   }
 ];
-
-const meetupImpact = {
-  image: "https://mundhebanni.org/meetups/hubli.JPG",
-  title: "Founder Meetups Across Karnataka",
-  built: "6 city meetups across 4 cities of Karnataka",
-  reach: "900+ entrepreneurs gained knowledge and network"
-};
 
 function EventsHeader() {
   return (
@@ -1211,46 +1268,79 @@ function EventsHeader() {
   );
 }
 
+function EventsToolbar({ activeFilter, onFilter, cityFilter, onCity, total }) {
+  const filters = [["all", "All Events"], ["upcoming", "Current / Upcoming"], ["past", "Previous Events"]];
+  const cities = ["All Cities", ...Array.from(new Set(pastMundheBanniMeetups.map((meetup) => meetup.city)))];
+  return (
+    <>
+      <section className="events-tabs">
+        <nav>{filters.map(([value, label]) => <button className={activeFilter === value ? "active" : ""} onClick={() => onFilter(value)} key={value}>{label}</button>)}</nav>
+        <div className="view-toggle"><button className="active" aria-label="Grid view"><Grid3X3 size={17} /></button><button aria-label="List view"><List size={18} /></button></div>
+        <div className="events-filter-row">
+          <div className="resource-search"><Search size={16} /><input placeholder="Search events by name or keyword..." readOnly /></div>
+          <label className="select-filter"><span>Type:</span><select value="Mundhe Banni Meetup" readOnly><option>Mundhe Banni Meetup</option></select></label>
+          <label className="select-filter"><span>Status:</span><select value={activeFilter} onChange={(event) => onFilter(event.target.value)}><option value="all">All</option><option value="upcoming">Current / Upcoming</option><option value="past">Previous</option></select></label>
+          <label className="select-filter"><span>City:</span><select value={cityFilter} onChange={(event) => onCity(event.target.value)}>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>
+          <button className="mobile-filter"><Filter size={16} />Filter & Sort</button>
+          <p>Showing {total} Mundhe Banni {total === 1 ? "meetup" : "meetups"}</p>
+        </div>
+      </section>
+      <section className="event-pills">{[["all", "All Meetups"], ["upcoming", "Current / Upcoming"], ["past", "Previous Events"], ["Bengaluru", "Bengaluru"], ["Mysuru", "Mysuru"], ["Tumkur", "Tumkur"], ["Hubballi", "Hubballi"]].map(([value, label], index) => <button className={(activeFilter === value || cityFilter === value || (index === 0 && activeFilter === "all" && cityFilter === "All Cities")) ? "active" : ""} onClick={() => {
+        if (value === "all") {
+          onFilter("all");
+          onCity("All Cities");
+          return;
+        }
+        pastMundheBanniMeetups.some((meetup) => meetup.city === value) ? onCity(value) : onFilter(value);
+      }} key={value}>{label}</button>)}</section>
+    </>
+  );
+}
+
 function PastMeetupCard({ meetup }) {
+  const isUpcoming = meetup.status === "upcoming";
   return (
     <article className="past-meetup-card">
-      <div className="past-meetup-image" style={{ backgroundImage: `linear-gradient(135deg, rgba(0,0,0,.42), rgba(29,43,83,.2)), url("${meetup.image}")` }}>
+      <div className={`event-directory-image ${meetup.imageTone}`}>
         <div className="event-date"><span>{meetup.month}</span><strong>{meetup.day}</strong></div>
-        <span className="event-type-badge past-meetup">{meetup.type}</span>
+        <span className={`event-type-badge ${isUpcoming ? "group-meetup" : "past-meetup"}`}>{isUpcoming ? "Current Event" : "Previous Event"}</span>
+        <Bookmark size={18} />
       </div>
       <div className="past-meetup-body">
+        <div className="past-meetup-meta"><span>{meetup.date}</span><small><Users size={18} />{meetup.attendees}</small></div>
         <h3>{meetup.title}</h3>
-        <p><CalendarDays size={14} />{meetup.date}</p>
-        <p><MapPin size={14} />{meetup.location}</p>
+        {meetup.collaboration && <em>{meetup.collaboration}</em>}
+        <p><MapPin size={18} />{meetup.location}</p>
         <p>{meetup.summary}</p>
-        <div className="past-meetup-highlights">{meetup.highlights.map((highlight) => <span key={highlight}>{highlight}</span>)}</div>
-        <small>👥 {meetup.attendees}</small>
       </div>
     </article>
   );
 }
 
 function PastMeetupsSection() {
+  const [activeFilter, setActiveFilter] = React.useState("all");
+  const [cityFilter, setCityFilter] = React.useState("All Cities");
+  const filteredMeetups = pastMundheBanniMeetups.filter((meetup) => {
+    const statusMatch = activeFilter === "all" || meetup.status === activeFilter;
+    const cityMatch = cityFilter === "All Cities" || meetup.city === cityFilter;
+    return statusMatch && cityMatch;
+  });
   return (
-    <section className="past-meetups-section">
-      <div className="past-meetups-heading">
-        <div>
-          <span>From mundhebanni.org/meetups</span>
-          <h2>Previously Held Meetups</h2>
-          <p>Real Mundhe Banni gatherings and outcomes from the public meetup page.</p>
+    <>
+      <EventsToolbar activeFilter={activeFilter} onFilter={setActiveFilter} cityFilter={cityFilter} onCity={setCityFilter} total={filteredMeetups.length} />
+      <section className="past-meetups-section">
+        <div className="past-meetups-heading">
+          <div>
+            <h2>Mundhe Banni Meetups</h2>
+            <p>Current and previous community gatherings across Karnataka.</p>
+          </div>
         </div>
-        <a href="https://mundhebanni.org/en/meetups" target="_blank" rel="noreferrer">View source page <ArrowUpRight size={14} /></a>
-      </div>
-      <div className="past-meetups-grid">
-        {pastMundheBanniMeetups.map((meetup) => <PastMeetupCard meetup={meetup} key={meetup.title} />)}
-        <article className="meetup-impact-card" style={{ backgroundImage: `linear-gradient(135deg, rgba(5,7,17,.72), rgba(36,86,160,.25)), url("${meetupImpact.image}")` }}>
-          <span>Program impact</span>
-          <h3>{meetupImpact.title}</h3>
-          <p>{meetupImpact.built}</p>
-          <strong>{meetupImpact.reach}</strong>
-        </article>
-      </div>
-    </section>
+        <div className="past-meetups-grid">
+          {filteredMeetups.map((meetup) => <PastMeetupCard meetup={meetup} key={meetup.title} />)}
+          {filteredMeetups.length === 0 && <p className="people-no-results">No meetups match these filters.</p>}
+        </div>
+      </section>
+    </>
   );
 }
 

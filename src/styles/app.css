@@ -982,6 +982,12 @@ h3 { margin: 0; font-size: 15px; color: #111; }
 .resource-thumb.podcast { background: linear-gradient(135deg, #f0e8fa, #fff); }
 .resource-thumb.infographic { background: linear-gradient(135deg, #fff0e0, #fff); }
 .resource-thumb.case-study { background: linear-gradient(135deg, #fff8e0, #fff); }
+.resource-thumb.official-guide,
+.resource-thumb.scheme { background: linear-gradient(135deg, #e8f5e9, #fff); }
+.resource-thumb.checklist { background: linear-gradient(135deg, #e0f5f5, #fff); }
+.resource-thumb.template { background: linear-gradient(135deg, #e3eaf8, #fff); }
+.resource-thumb.guide,
+.resource-thumb.kannada-guide { background: linear-gradient(135deg, #fff0e0, #fff); }
 .type-badge {
   position: absolute;
   top: 12px;
@@ -1000,6 +1006,12 @@ h3 { margin: 0; font-size: 15px; color: #111; }
 .type-badge.webinar { background: #e0f5ec; color: #1a7a4a; }
 .type-badge.case-study { background: #fff8e0; color: #8a6200; }
 .type-badge.podcast { background: #f0e8fa; color: #7b2fbe; }
+.type-badge.official-guide,
+.type-badge.scheme { background: #e8f5e9; color: #1a7a4a; }
+.type-badge.checklist { background: #e0f5f5; color: #188777; }
+.type-badge.template { background: #e3eaf8; color: #2456a0; }
+.type-badge.guide,
+.type-badge.kannada-guide { background: #fff0e0; color: var(--accent); }
 .library-card-body { padding: 14px 16px 16px; }
 .library-card-body h3 {
   min-height: 42px;
@@ -4115,6 +4127,13 @@ h3 { margin: 0; font-size: 15px; color: #111; }
 .event-directory-image.fintech { background-image: linear-gradient(135deg, rgba(29,43,83,.35), rgba(0,0,0,.08)), url("/assets/fintech.png"); }
 .event-directory-image.saas { background-image: linear-gradient(135deg, rgba(91,61,181,.3), rgba(0,0,0,.08)), url("/assets/saas-tech.png"); }
 .event-directory-image.investor { background-image: linear-gradient(135deg, rgba(184,118,10,.25), rgba(29,43,83,.25)), url("/assets/startup-conference.png"); }
+.event-directory-image.bengaluru { background-image: linear-gradient(135deg, rgba(0,0,0,.28), rgba(229,138,43,.18)), url("/assets/founder-meetup.png"); }
+.event-directory-image.bengaluru-first { background-image: linear-gradient(135deg, rgba(0,0,0,.18), rgba(229,138,43,.1)), url("/assets/meetup-1-bengaluru.png"); }
+.event-directory-image.bengaluru-fourth { background-image: linear-gradient(135deg, rgba(0,0,0,.22), rgba(36,86,160,.12)), url("/assets/meetup-4-bengaluru.png"); }
+.event-directory-image.hubballi { background-image: linear-gradient(135deg, rgba(26,122,74,.38), rgba(29,43,83,.18)), url("https://mundhebanni.org/meetups/hubli.JPG"); }
+.event-directory-image.mysuru { background-image: linear-gradient(135deg, rgba(36,86,160,.38), rgba(0,0,0,.12)), url("https://mundhebanni.org/meetups/CTIE2.JPG"); }
+.event-directory-image.tumkur { background-image: linear-gradient(135deg, rgba(91,61,181,.35), rgba(0,0,0,.12)), url("/assets/funding-workshop.png"); }
+.event-directory-image.tumkur-fifth { background-image: linear-gradient(135deg, rgba(91,61,181,.24), rgba(0,0,0,.12)), url("/assets/meetup-5-tumkur.png"); }
 .event-date {
   position: absolute;
   top: 12px;
@@ -4208,112 +4227,79 @@ h3 { margin: 0; font-size: 15px; color: #111; }
   white-space: nowrap;
 }
 .past-meetups-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr);
-  gap: 18px;
+  grid-template-columns: 1fr;
+  gap: 28px;
 }
-.past-meetup-card,
-.meetup-impact-card {
+.past-meetup-card {
   overflow: hidden;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
   border: 1px solid var(--line);
   border-radius: 10px;
   background: #fff;
+  box-shadow: 0 2px 10px rgba(17,24,39,.08);
+  transition: transform .2s, box-shadow .2s;
 }
-.past-meetup-card {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+.past-meetup-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(17,24,39,.1);
 }
-.past-meetup-image {
-  position: relative;
-  min-height: 240px;
-  background-position: center;
-  background-size: cover;
+.past-meetup-card .event-directory-image {
+  height: 100%;
+  min-height: 260px;
 }
-.past-meetup-image .event-date {
-  left: 14px;
-  top: 14px;
-}
-.past-meetup-image .event-type-badge {
-  position: absolute;
-  left: 14px;
-  bottom: 14px;
-}
-.past-meetup-body {
-  padding: 22px;
-}
-.past-meetup-body h3 {
-  margin: 0 0 10px;
-  color: var(--ink);
-  font-size: 21px;
-}
-.past-meetup-body p {
+.past-meetup-body { padding: 26px 28px; }
+.past-meetup-meta {
   display: flex;
-  gap: 8px;
-  margin: 8px 0 0;
-  color: #555;
-  font-size: 13px;
-  line-height: 1.5;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 14px;
 }
-.past-meetup-body p:nth-of-type(3) {
-  display: block;
-  margin-top: 14px;
-  color: #444;
-  font-size: 14px;
-}
-.past-meetup-highlights {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-.past-meetup-highlights span {
-  padding: 6px 9px;
+.past-meetup-meta span {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 13px;
   border-radius: 999px;
   background: #fff4e6;
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
-}
-.past-meetup-body small {
-  display: block;
-  margin-top: 14px;
-  color: #777;
-}
-.meetup-impact-card {
-  min-height: 240px;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-  padding: 24px;
-  background-position: center;
-  background-size: cover;
-  color: #fff;
-}
-.meetup-impact-card span {
-  width: fit-content;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.16);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 850;
-  text-transform: uppercase;
 }
-.meetup-impact-card h3 {
-  margin: 12px 0 8px;
-  font-size: 24px;
-  line-height: 1.15;
-}
-.meetup-impact-card p,
-.meetup-impact-card strong {
+.past-meetup-meta small {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
+  color: #555;
+  font-size: 14px;
+  font-weight: 650;
+}
+.past-meetup-body h3 {
+  margin-bottom: 12px;
+  font-size: 24px;
+  line-height: 1.18;
+}
+.past-meetup-body em {
+  display: block;
+  margin: 0 0 14px;
+  color: #4b5563;
+  font-size: 14px;
   line-height: 1.45;
 }
-.meetup-impact-card p { color: rgba(255,255,255,.82); }
-.meetup-impact-card strong {
+.past-meetup-body > p:first-of-type {
+  align-items: center;
+  gap: 10px;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 650;
+}
+.past-meetup-body > p:last-child {
   display: block;
-  margin-top: 12px;
-  color: #fff;
-  font-size: 18px;
+  margin-top: 16px;
+  color: #374151;
+  font-size: 15px;
+  line-height: 1.45;
 }
 .load-more {
   grid-column: 1 / -1;
@@ -5106,6 +5092,25 @@ h3 { margin: 0; font-size: 15px; color: #111; }
   .past-meetup-card {
     grid-template-columns: 1fr;
   }
+  .past-meetup-body { padding: 22px 18px; }
+  .past-meetup-meta {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+  .past-meetup-meta span {
+    max-width: 100%;
+    min-height: 36px;
+    padding: 8px 14px;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  .past-meetup-meta small { font-size: 15px; }
+  .past-meetup-meta > svg { margin-left: auto; }
+  .past-meetup-body h3 { font-size: 24px; }
+  .past-meetup-body em,
+  .past-meetup-body > p:first-of-type { font-size: 15px; }
+  .past-meetup-body > p:last-child { font-size: 16px; }
   .past-meetup-image { min-height: 210px; }
   .meetup-impact-card { min-height: 260px; }
   .load-more { display: none; }
