@@ -219,60 +219,25 @@ const levelProgress = (xpValue, level = getXpLevel(xpValue)) => {
   return Math.min(100, Math.max(0, ((xp - start) / (end - start)) * 100));
 };
 
-const discourseBaseUrl = "https://mundebanni-community.discourse.group";
-const discourseNewTopicUrl = `${discourseBaseUrl}/new-topic`;
-
 const fallbackCommunityCategories = [
-  { id: 11, name: "Fundraising", color: "2456A0", topic_count: 284, description: "Funding, investor readiness, and pitch feedback." },
-  { id: 12, name: "Product", color: "5B3DB5", topic_count: 198, description: "Product building, validation, and UX." },
-  { id: 13, name: "Legal", color: "1A7A4A", topic_count: 156, description: "Compliance, contracts, ESOPs, and IP." },
-  { id: 14, name: "Marketing", color: "C84B2F", topic_count: 142, description: "Growth, sales, and distribution." },
-  { id: 15, name: "Operations", color: "374151", topic_count: 98, description: "Hiring, process, vendors, and scale." },
-  { id: 16, name: "Technology", color: "9B3BB5", topic_count: 211, description: "Engineering, AI, data, and infrastructure." },
-  { id: 17, name: "Community", color: "E58A2B", topic_count: 304, description: "Member updates and platform conversations." },
-  { id: 1, name: "General", color: "888888", topic_count: 447, description: "Open founder discussions." }
+  { id: 1, slug: "fundraising", name: "Fundraising", color_hex: "#2456A0", topic_count: 0, description: "Term sheets, investor outreach, valuations, and raising capital." },
+  { id: 2, slug: "product", name: "Product", color_hex: "#5B3DB5", topic_count: 0, description: "Product strategy, roadmaps, user feedback, and building MVPs." },
+  { id: 3, slug: "legal", name: "Legal", color_hex: "#1A7A4A", topic_count: 0, description: "Incorporation, compliance, contracts, and IP for startups." },
+  { id: 4, slug: "marketing", name: "Marketing", color_hex: "#C84B2F", topic_count: 0, description: "Growth, branding, SEO, and customer acquisition." },
+  { id: 5, slug: "operations", name: "Operations", color_hex: "#374151", topic_count: 0, description: "Hiring, processes, vendor management, and scaling ops." },
+  { id: 6, slug: "technology", name: "Technology", color_hex: "#9B3BB5", topic_count: 0, description: "Engineering, architecture, AI tools, and tech stack decisions." },
+  { id: 7, slug: "general", name: "General", color_hex: "#888888", topic_count: 0, description: "Events, meetups, announcements, and general community chatter." }
 ];
 
 const fallbackCommunityTopics = [
-  { id: 901, title: "How are Karnataka SaaS founders approaching outbound sales in 2026?", slug: "karnataka-saas-outbound-sales", posts_count: 24, views: 820, like_count: 48, category_id: 12, tags: ["saas", "sales", "type-question"], created_at: "2026-06-10T10:00:00Z", last_posted_at: "2026-06-12T15:00:00Z", posters: [{ description: "Original Poster", user: { name: "Vikram Anand", username: "vikram" } }] },
-  { id: 902, title: "Checklist for closing your first angel round in Karnataka", slug: "first-angel-round-checklist", posts_count: 18, views: 640, like_count: 36, category_id: 11, tags: ["fundraising", "legal", "type-general"], created_at: "2026-06-08T09:00:00Z", last_posted_at: "2026-06-12T11:30:00Z", posters: [{ user: { name: "Dr. Ravi Kumar", username: "ravi" } }] },
-  { id: 903, title: "Share your best low-cost hiring channels for early startup teams", slug: "low-cost-hiring-channels", posts_count: 31, views: 940, like_count: 55, category_id: 15, tags: ["hiring", "operations", "type-idea"], created_at: "2026-06-06T09:00:00Z", last_posted_at: "2026-06-11T18:30:00Z", posters: [{ user: { name: "Meera Shetty", username: "meera" } }] },
-  { id: 904, title: "Community update: Bengaluru founder breakfast moves to July", slug: "bengaluru-founder-breakfast-july", posts_count: 9, views: 420, like_count: 22, category_id: 17, tags: ["events", "type-announcement"], created_at: "2026-06-05T09:00:00Z", last_posted_at: "2026-06-10T08:10:00Z", posters: [{ user: { name: "Mundhe Banni Team", username: "admin" } }] },
-  { id: 905, title: "What should agritech founders measure before approaching investors?", slug: "agritech-investor-metrics", posts_count: 14, views: 510, like_count: 29, category_id: 11, tags: ["agritech", "fundraising", "type-question"], created_at: "2026-06-03T09:00:00Z", last_posted_at: "2026-06-09T14:30:00Z", posters: [{ user: { name: "Sneha Patil", username: "sneha" } }] },
-  { id: 906, title: "Recommended accounting stack for seed-stage startups in India", slug: "accounting-stack-seed-stage-india", posts_count: 12, views: 388, like_count: 19, category_id: 13, tags: ["finance", "legal", "type-question"], created_at: "2026-06-02T09:00:00Z", last_posted_at: "2026-06-08T16:00:00Z", posters: [{ user: { name: "Rohit Shenoy", username: "rohit" } }] }
+  { id: "demo-1", title: "How are Karnataka SaaS founders approaching outbound sales in 2026?", slug: "karnataka-saas-outbound-sales", body: "Share what is working for outbound sales, first demos, and early conversion in Karnataka SaaS companies.", reply_count: 24, view_count: 820, like_count: 48, category_id: 2, topic_type: "question", is_pinned: true, created_at: "2026-06-10T10:00:00Z", last_activity_at: "2026-06-12T15:00:00Z", profiles: { display_name: "Vikram Anand", username: "vikram" }, forum_categories: { id: 2, name: "Product", color_hex: "#5B3DB5" }, forum_topic_tags: [{ interest_tags: { label: "saas" } }, { interest_tags: { label: "sales" } }] },
+  { id: "demo-2", title: "Checklist for closing your first angel round in Karnataka", slug: "first-angel-round-checklist", body: "What documents, metrics, and investor updates should founders prepare before starting angel conversations?", reply_count: 18, view_count: 640, like_count: 36, category_id: 1, topic_type: "general", created_at: "2026-06-08T09:00:00Z", last_activity_at: "2026-06-12T11:30:00Z", profiles: { display_name: "Dr. Ravi Kumar", username: "ravi" }, forum_categories: { id: 1, name: "Fundraising", color_hex: "#2456A0" }, forum_topic_tags: [{ interest_tags: { label: "fundraising" } }, { interest_tags: { label: "legal" } }] },
+  { id: "demo-3", title: "Share your best low-cost hiring channels for early startup teams", slug: "low-cost-hiring-channels", body: "Founders can add practical hiring channels, campus networks, referrals, and communities that worked for early teams.", reply_count: 31, view_count: 940, like_count: 55, category_id: 5, topic_type: "idea", created_at: "2026-06-06T09:00:00Z", last_activity_at: "2026-06-11T18:30:00Z", profiles: { display_name: "Meera Shetty", username: "meera" }, forum_categories: { id: 5, name: "Operations", color_hex: "#374151" }, forum_topic_tags: [{ interest_tags: { label: "hiring" } }, { interest_tags: { label: "operations" } }] },
+  { id: "demo-4", title: "Community update: Bengaluru founder breakfast moves to July", slug: "bengaluru-founder-breakfast-july", body: "The next Bengaluru founder breakfast is moving to July so more members can join after the current meetup cycle.", reply_count: 9, view_count: 420, like_count: 22, category_id: 7, topic_type: "announcement", created_at: "2026-06-05T09:00:00Z", last_activity_at: "2026-06-10T08:10:00Z", profiles: { display_name: "Mundhe Banni Team", username: "admin" }, forum_categories: { id: 7, name: "General", color_hex: "#888888" }, forum_topic_tags: [{ interest_tags: { label: "events" } }] }
 ];
 
-const communityCache = new Map();
-
-function useCommunitySWR(path, fallbackData) {
-  const [state, setState] = React.useState(() => ({
-    data: communityCache.get(path) || fallbackData,
-    error: null,
-    isLoading: !communityCache.has(path)
-  }));
-
-  React.useEffect(() => {
-    let cancelled = false;
-    setState((current) => ({ ...current, isLoading: !communityCache.has(path), error: null }));
-    fetch(`/api/discourse/${path}`)
-      .then((response) => {
-        if (!response.ok) throw new Error(`Discourse proxy returned ${response.status}`);
-        return response.json();
-      })
-      .then((data) => {
-        communityCache.set(path, data);
-        if (!cancelled) setState({ data, error: null, isLoading: false });
-      })
-      .catch((error) => {
-        if (!cancelled) setState((current) => ({ data: current.data || fallbackData, error, isLoading: false }));
-      });
-    return () => { cancelled = true; };
-  }, [path]);
-
-  return state;
-}
-
 const stripHtml = (value = "") => value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+const stripMarkdown = (value = "") => stripHtml(value).replace(/[#>*_`[\]()!-]/g, " ").replace(/\s+/g, " ").trim();
 const relativeTime = (value) => {
   if (!value) return "recently";
   const diff = Date.now() - new Date(value).getTime();
@@ -282,8 +247,67 @@ const relativeTime = (value) => {
   if (days < 30) return `${days}d ago`;
   return `${Math.round(days / 30)}mo ago`;
 };
-const categoryColor = (category) => `#${(category?.color || "888888").replace("#", "")}`;
-const topicUrl = (topic) => `${discourseBaseUrl}/t/${topic.slug || "topic"}/${topic.id}`;
+const categoryColor = (category) => category?.color_hex || `#${(category?.color || "888888").replace("#", "")}`;
+const topicUrl = (topic) => `/community/t/${topic.slug || "topic"}`;
+const topicTags = (topic) => (topic?.forum_topic_tags || []).map((tag) => tag?.interest_tags?.label || tag?.interest_tags?.slug).filter(Boolean);
+const forumAuthorName = (record) => record?.profiles?.display_name || record?.profiles?.username || "Community member";
+const forumInitials = (name = "Member") => {
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return (parts[0] || "MB").slice(0, 2).toUpperCase();
+  return parts.map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+};
+const topicTypeIcon = (type) => ({ question: "?", announcement: "📢", idea: "💡", general: "💬" }[type] || "💬");
+const forumSlugify = (value = "") => {
+  const slug = value
+    .normalize("NFC")
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{Letter}\p{Mark}\p{Number}]+/gu, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80)
+    .replace(/-+$/g, "");
+  return slug || "discussion";
+};
+const forumSlugSuffix = (seed = "") => String(seed || Math.random().toString(36).slice(2, 10)).replace(/[^a-z0-9]/gi, "").slice(0, 8).toLowerCase();
+const createForumSlug = (title, seed) => `${forumSlugify(title)}-${forumSlugSuffix(seed)}`;
+const isGenericForumSlug = (slug = "") => slug === "topic" || /^topic-[a-z0-9]{4,}$/i.test(slug);
+const hasKannadaText = (value = "") => /[\u0C80-\u0CFF]/.test(value);
+const shouldRepairForumSlug = (topic) => Boolean(topic?.title && (isGenericForumSlug(topic.slug) || (hasKannadaText(topic.title) && topic.slug !== createForumSlug(topic.title, topic.id))));
+const escapeHtml = (value = "") => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]));
+const renderMarkdown = (value = "") => {
+  const lines = escapeHtml(value).split("\n");
+  let inList = false;
+  const html = lines.map((line) => {
+    const listMatch = line.match(/^\s*[-*]\s+(.+)/);
+    if (listMatch) {
+      const item = `<li>${inlineMarkdown(listMatch[1])}</li>`;
+      if (!inList) {
+        inList = true;
+        return `<ul>${item}`;
+      }
+      return item;
+    }
+    const close = inList ? "</ul>" : "";
+    inList = false;
+    if (!line.trim()) return `${close}<br />`;
+    if (line.startsWith("### ")) return `${close}<h3>${inlineMarkdown(line.slice(4))}</h3>`;
+    if (line.startsWith("## ")) return `${close}<h2>${inlineMarkdown(line.slice(3))}</h2>`;
+    if (line.startsWith("# ")) return `${close}<h1>${inlineMarkdown(line.slice(2))}</h1>`;
+    return `${close}<p>${inlineMarkdown(line)}</p>`;
+  }).join("");
+  return `${html}${inList ? "</ul>" : ""}`;
+};
+const inlineMarkdown = (value = "") => value
+  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+  .replace(/\*(.*?)\*/g, "<em>$1</em>")
+  .replace(/`([^`]+)`/g, "<code>$1</code>")
+  .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+const isAdminProfile = (profile) => profile?.role === "admin";
+const awardXp = async (payload) => {
+  if (!supabase) return;
+  const { error } = await supabase.from("xp_events").insert(payload);
+  if (error) console.warn("XP event skipped", error.message);
+};
 
 function Breadcrumb({ items }) {
   return (
@@ -854,7 +878,7 @@ function InviteFoundersModal({ onClose }) {
 }
 
 function useMyProfileSupplement(userId) {
-  const [state, setState] = React.useState({ groups: "—", events: "—", interests: [], loading: false });
+  const [state, setState] = React.useState({ groups: "—", events: "—", interests: [], discussions: "—", replies: "—", forumActivity: [], loading: false });
   React.useEffect(() => {
     if (!userId || !supabase) return undefined;
     let cancelled = false;
@@ -862,10 +886,22 @@ function useMyProfileSupplement(userId) {
     Promise.all([
       supabase.from("group_members").select("*", { count: "exact", head: true }).eq("profile_id", userId),
       supabase.from("event_rsvps").select("*, events!inner(status)", { count: "exact", head: true }).eq("profile_id", userId).eq("rsvp_status", "going").eq("events.status", "completed"),
-      supabase.from("profile_interests").select("interest_tags ( label )").eq("profile_id", userId)
-    ]).then(([groupsResult, eventsResult, interestsResult]) => {
+      supabase.from("profile_interests").select("interest_tags ( label )").eq("profile_id", userId),
+      supabase.from("forum_topics").select("id, title, slug, created_at, reply_count", { count: "exact" }).eq("author_id", userId).is("deleted_at", null).order("created_at", { ascending: false }).limit(3),
+      supabase.from("forum_replies").select("id, body, created_at, forum_topics!forum_replies_topic_id_fkey ( id, title, slug )", { count: "exact" }).eq("author_id", userId).is("deleted_at", null).order("created_at", { ascending: false }).limit(3)
+    ]).then(([groupsResult, eventsResult, interestsResult, topicsResult, repliesResult]) => {
       if (cancelled) return;
-      setState({ groups: groupsResult.error ? "—" : groupsResult.count ?? 0, events: eventsResult.error ? "—" : eventsResult.count ?? 0, interests: (interestsResult.data || []).map((item) => item.interest_tags?.label).filter(Boolean), loading: false });
+      const topicActivity = (topicsResult.data || []).map((topic) => ({ id: `topic-${topic.id}`, type: "Started discussion", title: topic.title, href: topicUrl(topic), meta: `${topic.reply_count || 0} replies · ${relativeTime(topic.created_at)}`, created_at: topic.created_at }));
+      const replyActivity = (repliesResult.data || []).map((reply) => ({ id: `reply-${reply.id}`, type: "Replied", title: reply.forum_topics?.title || stripMarkdown(reply.body).slice(0, 60), href: reply.forum_topics ? topicUrl(reply.forum_topics) : "/community", meta: relativeTime(reply.created_at), created_at: reply.created_at }));
+      setState({
+        groups: groupsResult.error ? "—" : groupsResult.count ?? 0,
+        events: eventsResult.error ? "—" : eventsResult.count ?? 0,
+        interests: (interestsResult.data || []).map((item) => item.interest_tags?.label).filter(Boolean),
+        discussions: topicsResult.error ? "—" : topicsResult.count ?? 0,
+        replies: repliesResult.error ? "—" : repliesResult.count ?? 0,
+        forumActivity: [...topicActivity, ...replyActivity].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 5),
+        loading: false
+      });
     });
     return () => { cancelled = true; };
   }, [userId]);
@@ -888,7 +924,7 @@ function MyProfilePage() {
   const completion = Math.round((completionFields.filter(Boolean).length / completionFields.length) * 100);
   const joined = profile.created_at ? new Date(profile.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Recently";
 
-  return <><Header /><main className="my-profile-page"><section className="profile-cover"><button>Edit Cover</button></section><section className="profile-intro"><MemberAvatar name={name} role={profile.role} avatarUrl={profile.avatar_url} size="profile" /><div className="profile-info-row"><div><h1>{name} <RoleBadge role={profile.role} /></h1><p className="username">@{profile.username || "member"}</p><p>{profile.bio || "This member has not added a bio yet."}</p><div className="profile-meta"><span>📍 {city}</span>{profile.website_url && <a href={profile.website_url}>Website</a>}{profile.linkedin_url && <a href={profile.linkedin_url}>LinkedIn</a>}<span>Joined {joined}</span></div></div><aside className="completion-card"><h2>Profile Completion</h2><div className="completion-ring" style={{ background: `conic-gradient(var(--accent) 0 ${completion}%, var(--line) ${completion}% 100%)` }}><span>{completion}%</span></div><p>{completion === 100 ? "Your profile is complete." : "Add more profile details to help members connect."}</p></aside></div></section><section className="profile-stats">{[["—", "Discussions"], ["—", "Replies"], [supplement.groups, "Groups"], [supplement.events, "Events Attended"], [xp.toLocaleString(), "XP Points"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</section><section className="profile-xp"><div><strong>★ Level {level}{level === 5 ? " - Top Contributor" : ""}</strong><div className="xp-meter wide"><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div><small>{level === 5 ? `${xp.toLocaleString()} XP` : `${xp.toLocaleString()} / ${nextThreshold.toLocaleString()} XP to Level ${level + 1}`}</small></div></section><section className="profile-actions"><button>Edit Profile</button><button>Settings</button><button>Share Profile</button></section><nav className="profile-tabs"><button className="active">Profile</button><button>Groups</button><button>Events</button><button>Settings</button></nav><section className="profile-feed-layout"><div className="profile-real-content"><h2>About</h2><p>{profile.bio || "Add a bio to tell the community what you're building and where you can help."}</p><div className="profile-coming-soon"><MessageCircle size={24} /><div><strong>Discourse activity coming soon</strong><p>Discussions and replies will appear after profile-to-Discourse SSO mapping is connected.</p></div></div></div><aside className="profile-sidebar"><ProfileWidget title={`Interests (${supplement.interests.length})`}>{supplement.interests.length ? supplement.interests.map((tag) => <span key={tag}>{tag}</span>) : <p>No interests added yet.</p>}</ProfileWidget><ProfileWidget title="Account"><p><strong>Email</strong><small>{user.email}</small></p><p><strong>Role</strong><small>{getRoleMeta(profile.role).label}</small></p></ProfileWidget></aside></section></main><Footer /></>;
+  return <><Header /><main className="my-profile-page"><section className="profile-cover"><button>Edit Cover</button></section><section className="profile-intro"><MemberAvatar name={name} role={profile.role} avatarUrl={profile.avatar_url} size="profile" /><div className="profile-info-row"><div><h1>{name} <RoleBadge role={profile.role} /></h1><p className="username">@{profile.username || "member"}</p><p>{profile.bio || "This member has not added a bio yet."}</p><div className="profile-meta"><span>📍 {city}</span>{profile.website_url && <a href={profile.website_url}>Website</a>}{profile.linkedin_url && <a href={profile.linkedin_url}>LinkedIn</a>}<span>Joined {joined}</span></div></div><aside className="completion-card"><h2>Profile Completion</h2><div className="completion-ring" style={{ background: `conic-gradient(var(--accent) 0 ${completion}%, var(--line) ${completion}% 100%)` }}><span>{completion}%</span></div><p>{completion === 100 ? "Your profile is complete." : "Add more profile details to help members connect."}</p></aside></div></section><section className="profile-stats">{[[supplement.discussions, "Discussions"], [supplement.replies, "Replies"], [supplement.groups, "Groups"], [supplement.events, "Events Attended"], [xp.toLocaleString(), "XP Points"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</section><section className="profile-xp"><div><strong>★ Level {level}{level === 5 ? " - Top Contributor" : ""}</strong><div className="xp-meter wide"><span style={{ width: `${levelProgress(xp, level)}%` }}></span></div><small>{level === 5 ? `${xp.toLocaleString()} XP` : `${xp.toLocaleString()} / ${nextThreshold.toLocaleString()} XP to Level ${level + 1}`}</small></div></section><section className="profile-actions"><button>Edit Profile</button><button>Settings</button><button>Share Profile</button></section><nav className="profile-tabs"><button className="active">Profile</button><button>Groups</button><button>Events</button><button>Settings</button></nav><section className="profile-feed-layout"><div className="profile-real-content"><h2>About</h2><p>{profile.bio || "Add a bio to tell the community what you're building and where you can help."}</p><div className="profile-forum-activity"><h2>Forum Activity</h2>{supplement.forumActivity.length ? supplement.forumActivity.map((item) => <a href={item.href} key={item.id}><span>{item.type}</span><strong>{item.title}</strong><small>{item.meta}</small></a>) : <p>No forum activity yet.</p>}</div></div><aside className="profile-sidebar"><ProfileWidget title={`Interests (${supplement.interests.length})`}>{supplement.interests.length ? supplement.interests.map((tag) => <span key={tag}>{tag}</span>) : <p>No interests added yet.</p>}</ProfileWidget><ProfileWidget title="Account"><p><strong>Email</strong><small>{user.email}</small></p><p><strong>Role</strong><small>{getRoleMeta(profile.role).label}</small></p></ProfileWidget></aside></section></main><Footer /></>;
 }
 
 function ProfileWidget({ title, children }) {
@@ -1253,65 +1289,88 @@ const pastMundheBanniMeetups = [
   }
 ];
 
-function EventsHeader() {
+function EventsHeader({ featured }) {
+  const totalAttendees = pastMundheBanniMeetups.reduce((sum, meetup) => sum + Number.parseInt(meetup.attendees, 10), 0);
   return (
     <section className="events-page-header">
       <Breadcrumb items={["Events"]} />
       <div className="events-title-row">
-        <div><h1>Events</h1><p>Founder meetups and community gatherings from Mundhe Banni across Karnataka.</p></div>
-        <div className="events-header-side">
-          <div className="events-header-stats"><div><strong>6</strong><span>City Meetups</span></div><div><strong>4</strong><span>Karnataka Cities</span></div><div><strong>900+</strong><span>Entrepreneurs Reached</span></div></div>
-          <a className="button primary" href="/events/create">＋ Create Event</a>
+        <div>
+          <span className="events-eyebrow">Mundhe Banni Meetups</span>
+          <h1>Founder gatherings across Karnataka</h1>
+          <p>Meet entrepreneurs, students, operators, investors, and ecosystem builders through city-led community events.</p>
+          <div className="events-hero-actions">
+            <a className="button primary" href="#meetups">Explore Meetups</a>
+            <a className="button secondary" href="/community">Discuss Events</a>
+          </div>
         </div>
+        <article className="events-featured-card">
+          <div className={`event-directory-image ${featured.imageTone}`}>
+            <div className="event-date"><span>{featured.month}</span><strong>{featured.day}</strong></div>
+            <span className={`event-type-badge ${featured.status === "upcoming" ? "group-meetup" : "past-meetup"}`}>{featured.status === "upcoming" ? "Next Meetup" : "Featured Meetup"}</span>
+          </div>
+          <div>
+            <small>{featured.date}</small>
+            <h2>{featured.title}</h2>
+            <p><MapPin size={16} />{featured.location}</p>
+          </div>
+        </article>
+      </div>
+      <div className="events-header-stats">
+        <div><strong>{pastMundheBanniMeetups.length}</strong><span>Total Meetups</span></div>
+        <div><strong>{new Set(pastMundheBanniMeetups.map((meetup) => meetup.city)).size}</strong><span>Karnataka Cities</span></div>
+        <div><strong>{totalAttendees}+</strong><span>People Reached</span></div>
+        <div><strong>{pastMundheBanniMeetups.filter((meetup) => meetup.status === "upcoming").length}</strong><span>Upcoming</span></div>
       </div>
     </section>
   );
 }
 
-function EventsToolbar({ activeFilter, onFilter, cityFilter, onCity, total }) {
-  const filters = [["all", "All Events"], ["upcoming", "Current / Upcoming"], ["past", "Previous Events"]];
+function EventsToolbar({ activeFilter, onFilter, cityFilter, onCity, query, onQuery, total }) {
+  const filters = [["all", "All"], ["upcoming", "Upcoming"], ["past", "Previous"]];
   const cities = ["All Cities", ...Array.from(new Set(pastMundheBanniMeetups.map((meetup) => meetup.city)))];
   return (
-    <>
-      <section className="events-tabs">
-        <nav>{filters.map(([value, label]) => <button className={activeFilter === value ? "active" : ""} onClick={() => onFilter(value)} key={value}>{label}</button>)}</nav>
-        <div className="view-toggle"><button className="active" aria-label="Grid view"><Grid3X3 size={17} /></button><button aria-label="List view"><List size={18} /></button></div>
-        <div className="events-filter-row">
-          <div className="resource-search"><Search size={16} /><input placeholder="Search events by name or keyword..." readOnly /></div>
-          <label className="select-filter"><span>Type:</span><select value="Mundhe Banni Meetup" readOnly><option>Mundhe Banni Meetup</option></select></label>
-          <label className="select-filter"><span>Status:</span><select value={activeFilter} onChange={(event) => onFilter(event.target.value)}><option value="all">All</option><option value="upcoming">Current / Upcoming</option><option value="past">Previous</option></select></label>
-          <label className="select-filter"><span>City:</span><select value={cityFilter} onChange={(event) => onCity(event.target.value)}>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>
-          <button className="mobile-filter"><Filter size={16} />Filter & Sort</button>
-          <p>Showing {total} Mundhe Banni {total === 1 ? "meetup" : "meetups"}</p>
+    <section className="events-toolbar" id="meetups">
+      <div className="events-toolbar-head">
+        <div>
+          <h2>Mundhe Banni Meetups</h2>
+          <p>{total} {total === 1 ? "event" : "events"} matching your filters</p>
         </div>
-      </section>
-      <section className="event-pills">{[["all", "All Meetups"], ["upcoming", "Current / Upcoming"], ["past", "Previous Events"], ["Bengaluru", "Bengaluru"], ["Mysuru", "Mysuru"], ["Tumkur", "Tumkur"], ["Hubballi", "Hubballi"]].map(([value, label], index) => <button className={(activeFilter === value || cityFilter === value || (index === 0 && activeFilter === "all" && cityFilter === "All Cities")) ? "active" : ""} onClick={() => {
+        <nav>{filters.map(([value, label]) => <button className={activeFilter === value ? "active" : ""} onClick={() => onFilter(value)} key={value}>{label}</button>)}</nav>
+      </div>
+      <div className="events-filter-row">
+        <div className="resource-search"><Search size={16} /><input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search by city, venue, session, or speaker..." /></div>
+        <label className="select-filter"><span>City</span><select value={cityFilter} onChange={(event) => onCity(event.target.value)}>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>
+      </div>
+      <div className="event-pills">{[["all", "All Meetups"], ["upcoming", "Upcoming"], ["past", "Previous"], ["Bengaluru", "Bengaluru"], ["Mysuru", "Mysuru"], ["Tumkur", "Tumkur"], ["Hubballi", "Hubballi"]].map(([value, label], index) => <button className={(activeFilter === value || cityFilter === value || (index === 0 && activeFilter === "all" && cityFilter === "All Cities")) ? "active" : ""} onClick={() => {
         if (value === "all") {
           onFilter("all");
           onCity("All Cities");
+          onQuery("");
           return;
         }
         pastMundheBanniMeetups.some((meetup) => meetup.city === value) ? onCity(value) : onFilter(value);
-      }} key={value}>{label}</button>)}</section>
-    </>
+      }} key={value}>{label}</button>)}</div>
+    </section>
   );
 }
 
 function PastMeetupCard({ meetup }) {
   const isUpcoming = meetup.status === "upcoming";
   return (
-    <article className="past-meetup-card">
+    <article className={`past-meetup-card ${isUpcoming ? "upcoming" : "past"}`}>
       <div className={`event-directory-image ${meetup.imageTone}`}>
         <div className="event-date"><span>{meetup.month}</span><strong>{meetup.day}</strong></div>
         <span className={`event-type-badge ${isUpcoming ? "group-meetup" : "past-meetup"}`}>{isUpcoming ? "Current Event" : "Previous Event"}</span>
         <Bookmark size={18} />
       </div>
       <div className="past-meetup-body">
-        <div className="past-meetup-meta"><span>{meetup.date}</span><small><Users size={18} />{meetup.attendees}</small></div>
+        <div className="past-meetup-meta"><span>{meetup.date}</span><small><Users size={18} />{meetup.attendees}</small><small><MapPin size={17} />{meetup.city}</small></div>
         <h3>{meetup.title}</h3>
         {meetup.collaboration && <em>{meetup.collaboration}</em>}
         <p><MapPin size={18} />{meetup.location}</p>
         <p>{meetup.summary}</p>
+        <div className="event-card-footer"><span>{isUpcoming ? "Open for planning" : "Community archive"}</span><button>{isUpcoming ? "View Details" : "View Recap"}</button></div>
       </div>
     </article>
   );
@@ -1320,24 +1379,21 @@ function PastMeetupCard({ meetup }) {
 function PastMeetupsSection() {
   const [activeFilter, setActiveFilter] = React.useState("all");
   const [cityFilter, setCityFilter] = React.useState("All Cities");
+  const [query, setQuery] = React.useState("");
   const filteredMeetups = pastMundheBanniMeetups.filter((meetup) => {
     const statusMatch = activeFilter === "all" || meetup.status === activeFilter;
     const cityMatch = cityFilter === "All Cities" || meetup.city === cityFilter;
-    return statusMatch && cityMatch;
+    const searchText = `${meetup.title} ${meetup.city} ${meetup.location} ${meetup.summary} ${meetup.collaboration || ""}`.toLowerCase();
+    const searchMatch = !query.trim() || searchText.includes(query.trim().toLowerCase());
+    return statusMatch && cityMatch && searchMatch;
   });
   return (
     <>
-      <EventsToolbar activeFilter={activeFilter} onFilter={setActiveFilter} cityFilter={cityFilter} onCity={setCityFilter} total={filteredMeetups.length} />
+      <EventsToolbar activeFilter={activeFilter} onFilter={setActiveFilter} cityFilter={cityFilter} onCity={setCityFilter} query={query} onQuery={setQuery} total={filteredMeetups.length} />
       <section className="past-meetups-section">
-        <div className="past-meetups-heading">
-          <div>
-            <h2>Mundhe Banni Meetups</h2>
-            <p>Current and previous community gatherings across Karnataka.</p>
-          </div>
-        </div>
         <div className="past-meetups-grid">
           {filteredMeetups.map((meetup) => <PastMeetupCard meetup={meetup} key={meetup.title} />)}
-          {filteredMeetups.length === 0 && <p className="people-no-results">No meetups match these filters.</p>}
+          {filteredMeetups.length === 0 && <div className="events-empty-state"><CalendarDays size={32} /><h3>No meetups match these filters.</h3><p>Try clearing search or choosing another city.</p></div>}
         </div>
       </section>
     </>
@@ -1345,8 +1401,9 @@ function PastMeetupsSection() {
 }
 
 function EventsPage() {
+  const featured = pastMundheBanniMeetups.find((meetup) => meetup.status === "upcoming") || pastMundheBanniMeetups[0];
   return (
-    <><Header /><main><EventsHeader /><PastMeetupsSection /></main><Footer /></>
+    <><Header /><main className="events-page"><EventsHeader featured={featured} /><PastMeetupsSection /></main><Footer /></>
   );
 }
 
@@ -1580,7 +1637,7 @@ function GroupsPage() {
 }
 
 function useGroupDetail(slug, userId, reloadKey) {
-  const [state, setState] = React.useState({ group: null, members: [], events: [], files: [], discourseLink: null, myRole: null, loading: true, error: null });
+  const [state, setState] = React.useState({ group: null, members: [], events: [], files: [], myRole: null, loading: true, error: null });
   React.useEffect(() => {
     if (!supabase || !slug) return undefined;
     let cancelled = false;
@@ -1594,17 +1651,16 @@ function useGroupDetail(slug, userId, reloadKey) {
       const pendingRoleResult = group && userId ? await supabase.from("group_members").select("group_role").eq("group_id", group.id).eq("profile_id", userId).maybeSingle() : { data: null };
       const pendingRole = pendingRoleResult.data?.group_role || null;
       if (!group || (group.status !== "active" && group.created_by !== userId && pendingRole !== "admin")) {
-        setState({ group: null, members: [], events: [], files: [], discourseLink: null, myRole: null, loading: false, error: null });
+        setState({ group: null, members: [], events: [], files: [], myRole: null, loading: false, error: null });
         return;
       }
-      const [membersResult, eventsResult, filesResult, linkResult, roleResult] = await Promise.all([
+      const [membersResult, eventsResult, filesResult, roleResult] = await Promise.all([
         supabase.from("group_members").select("profile_id, group_role, joined_at, profiles ( id, username, display_name, role, avatar_url, bio )").eq("group_id", group.id).order("joined_at", { ascending: true }),
         supabase.from("events").select("id, title, start_at, status").eq("group_id", group.id).order("start_at", { ascending: true }).limit(6),
         supabase.from("group_files").select("*").eq("group_id", group.id).order("created_at", { ascending: false }).limit(12),
-        supabase.from("group_discourse_links").select("*").eq("group_id", group.id).maybeSingle(),
         userId ? supabase.from("group_members").select("group_role").eq("group_id", group.id).eq("profile_id", userId).maybeSingle() : Promise.resolve({ data: null })
       ]);
-      setState({ group, members: membersResult.error ? [] : membersResult.data || [], events: eventsResult.error ? [] : eventsResult.data || [], files: filesResult.error ? [] : filesResult.data || [], discourseLink: linkResult.error ? null : linkResult.data, myRole: roleResult.data?.group_role || pendingRole, loading: false, error: null });
+      setState({ group, members: membersResult.error ? [] : membersResult.data || [], events: eventsResult.error ? [] : eventsResult.data || [], files: filesResult.error ? [] : filesResult.data || [], myRole: roleResult.data?.group_role || pendingRole, loading: false, error: null });
     }).catch((error) => {
       if (!cancelled) setState((current) => ({ ...current, loading: false, error }));
     });
@@ -1617,7 +1673,7 @@ function GroupDetailPage({ slug }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState("Discussions");
   const [reloadKey, setReloadKey] = React.useState(0);
-  const { group, members, events, files, discourseLink, myRole, loading, error } = useGroupDetail(slug, user?.id, reloadKey);
+  const { group, members, events, files, myRole, loading, error } = useGroupDetail(slug, user?.id, reloadKey);
   const isAdmin = myRole === "admin";
   const removeMember = async (profileId) => {
     if (!group || !isAdmin || profileId === user?.id) return;
@@ -1629,13 +1685,12 @@ function GroupDetailPage({ slug }) {
   if (!group) return <><Header/><main className="profile-signed-out"><h1>Group unavailable</h1><p>This group is not active or does not exist.</p><a className="button secondary" href="/groups">Back to Groups</a></main><Footer/></>;
   const rules = (group.group_rules || []).slice().sort((a, b) => (a.rule_order || 0) - (b.rule_order || 0));
   const admins = members.filter((member) => member.group_role === "admin");
-  return <><Header/><main className="group-detail-page"><Breadcrumb items={["Groups", group.name]}/><section className="group-detail-banner" style={{ backgroundImage: `linear-gradient(to top, rgba(29,43,83,.85), transparent), url("${groupBanner(group)}")` }}><div><span className="group-directory-logo" style={{"--group-color":groupColor(group)}}>{group.logo_url ? <img src={group.logo_url} alt="" /> : groupIcon(group)}</span><h1>{group.name}</h1><span className={`privacy-badge ${groupClass(groupPrivacyLabel(group.privacy_type))}`}>{groupPrivacyIcon(group.privacy_type)} {groupPrivacyLabel(group.privacy_type)}</span><small>Active</small><p>{groupMemberCount(group)} Members · {groupLocation(group)}</p></div></section><section className="group-action-bar"><div><strong>{myRole ? `✓ You're a ${myRole}` : "Join this group to participate"}</strong></div><div><button>🔔 Notifications</button><button>👤 Invite Members</button><a className="button secondary" href="/groups">↗</a></div></section><nav className="group-detail-tabs">{["Discussions","Events","Members","Files","About"].map((tab) => <button className={activeTab===tab?"active":""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</nav><section className="group-discussion-layout"><div className="discussion-feed"><GroupTabContent tab={activeTab} group={group} members={members} events={events} files={files} rules={rules} discourseLink={discourseLink} isAdmin={isAdmin} onRemoveMember={removeMember}/></div><aside className="group-detail-sidebar"><GroupWidget title="About This Group"><p>{group.short_description || group.full_description || "A focused founder group on Mundhe Banni."}</p><small>👥 {groupMemberCount(group)} Members</small><small>📍 {groupLocation(group)}</small><small>🗓 Est. {group.created_at ? new Date(group.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : "Recently"}</small></GroupWidget><GroupWidget title="Admins & Moderators">{admins.length ? admins.map((member) => <div className="admin-row" key={member.profile_id}><span>{(member.profiles?.display_name || member.profiles?.username || "A").slice(0,2).toUpperCase()}</span><strong>{member.profiles?.display_name || member.profiles?.username || "Admin"}</strong><small>{member.group_role}</small></div>) : <p>No admins listed.</p>}</GroupWidget><GroupWidget title="Recently Joined"><AvatarStack count={`${Math.max(0, members.length - 4)} more members`}/><button className="text-action" onClick={() => setActiveTab("Members")}>View All Members →</button></GroupWidget></aside></section></main>{isAdmin && <button className="group-admin-fab">⚙️</button>}</>;
+  return <><Header/><main className="group-detail-page"><Breadcrumb items={["Groups", group.name]}/><section className="group-detail-banner" style={{ backgroundImage: `linear-gradient(to top, rgba(29,43,83,.85), transparent), url("${groupBanner(group)}")` }}><div><span className="group-directory-logo" style={{"--group-color":groupColor(group)}}>{group.logo_url ? <img src={group.logo_url} alt="" /> : groupIcon(group)}</span><h1>{group.name}</h1><span className={`privacy-badge ${groupClass(groupPrivacyLabel(group.privacy_type))}`}>{groupPrivacyIcon(group.privacy_type)} {groupPrivacyLabel(group.privacy_type)}</span><small>Active</small><p>{groupMemberCount(group)} Members · {groupLocation(group)}</p></div></section><section className="group-action-bar"><div><strong>{myRole ? `✓ You're a ${myRole}` : "Join this group to participate"}</strong></div><div><button>🔔 Notifications</button><button>👤 Invite Members</button><a className="button secondary" href="/groups">↗</a></div></section><nav className="group-detail-tabs">{["Discussions","Events","Members","Files","About"].map((tab) => <button className={activeTab===tab?"active":""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</nav><section className="group-discussion-layout"><div className="discussion-feed"><GroupTabContent tab={activeTab} group={group} members={members} events={events} files={files} rules={rules} isAdmin={isAdmin} onRemoveMember={removeMember}/></div><aside className="group-detail-sidebar"><GroupWidget title="About This Group"><p>{group.short_description || group.full_description || "A focused founder group on Mundhe Banni."}</p><small>👥 {groupMemberCount(group)} Members</small><small>📍 {groupLocation(group)}</small><small>🗓 Est. {group.created_at ? new Date(group.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : "Recently"}</small></GroupWidget><GroupWidget title="Admins & Moderators">{admins.length ? admins.map((member) => <div className="admin-row" key={member.profile_id}><span>{(member.profiles?.display_name || member.profiles?.username || "A").slice(0,2).toUpperCase()}</span><strong>{member.profiles?.display_name || member.profiles?.username || "Admin"}</strong><small>{member.group_role}</small></div>) : <p>No admins listed.</p>}</GroupWidget><GroupWidget title="Recently Joined"><AvatarStack count={`${Math.max(0, members.length - 4)} more members`}/><button className="text-action" onClick={() => setActiveTab("Members")}>View All Members →</button></GroupWidget></aside></section></main>{isAdmin && <button className="group-admin-fab">⚙️</button>}</>;
 }
 
-function GroupTabContent({ tab, group, members, events, files, rules, discourseLink, isAdmin, onRemoveMember }) {
+function GroupTabContent({ tab, group, members, events, files, rules, isAdmin, onRemoveMember }) {
   if (tab === "Discussions") {
-    if (!discourseLink?.category_id) return <div className="group-tab-empty"><MessageCircle size={30}/><h3>This group doesn't have a discussion space set up yet.</h3><p>Once a Discourse category is linked, group discussions will appear here.</p></div>;
-    return <GroupDiscourseTopics categoryId={discourseLink.category_id} />;
+    return <GroupForumTopics group={group} />;
   }
   if (tab === "Members") return <div className="group-member-list">{members.map((member) => <article className="group-member-card" key={member.profile_id}><MemberAvatar name={member.profiles?.display_name || member.profiles?.username} role={member.profiles?.role} avatarUrl={member.profiles?.avatar_url}/><div><strong>{member.profiles?.display_name || member.profiles?.username || "Member"}</strong><RoleBadge role={member.profiles?.role}/><small>Joined {member.joined_at ? relativeTime(member.joined_at) : "recently"}</small></div>{isAdmin && member.group_role !== "admin" && <button onClick={() => onRemoveMember(member.profile_id)}>Remove</button>}</article>)}</div>;
   if (tab === "Events") return events.length ? <div className="group-simple-list">{events.map((event) => <article key={event.id}><strong>{event.title}</strong><small>{event.start_at ? new Date(event.start_at).toLocaleString("en-IN") : "Date pending"}</small></article>)}</div> : <div className="group-tab-empty"><CalendarDays size={30}/><h3>No events yet for this group.</h3></div>;
@@ -1643,12 +1698,28 @@ function GroupTabContent({ tab, group, members, events, files, rules, discourseL
   return <div className="group-about-tab"><h2>About {group.name}</h2><p>{group.full_description || group.short_description || "No full description has been added yet."}</p><h3>Community Rules</h3>{rules.length ? <ol>{rules.map((rule) => <li key={`${rule.rule_order}-${rule.rule_text}`}>{rule.rule_text}</li>)}</ol> : <p>No rules added yet.</p>}</div>;
 }
 
-function GroupDiscourseTopics({ categoryId }) {
-  const { data, error, isLoading } = useCommunitySWR(`c/${categoryId}/show.json`, { topic_list: { topics: [] } });
-  const topics = data?.topic_list?.topics || [];
-  if (isLoading) return <SkeletonList />;
-  if (error) return <div className="group-tab-empty"><MessageCircle size={30}/><h3>Could not load group discussions.</h3><p>Open the full forum if you need live discussion data right now.</p></div>;
-  return topics.length ? <div className="community-topic-list">{topics.map((topic) => <CommunityTopicRow topic={topic} category={{ name: "Group", color: "E58A2B" }} onLogin={() => {}} key={topic.id}/>)}</div> : <div className="group-tab-empty"><MessageCircle size={30}/><h3>No discussions yet.</h3></div>;
+function GroupForumTopics({ group }) {
+  const [state, setState] = React.useState({ topics: [], loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase || !group?.id) {
+      setState({ topics: [], loading: false, error: supabase ? null : new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    supabase
+      .from("forum_topics")
+      .select("*, profiles!forum_topics_author_id_fkey ( id, username, display_name, avatar_url, role ), forum_categories ( id, slug, name, color_hex ), forum_topic_tags ( interest_tags ( id, label, slug ) )")
+      .eq("group_id", group.id)
+      .is("deleted_at", null)
+      .order("last_activity_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (!cancelled) setState({ topics: data || [], loading: false, error });
+      });
+    return () => { cancelled = true; };
+  }, [group?.id]);
+  if (state.loading) return <SkeletonList />;
+  if (state.error) return <div className="group-tab-empty"><MessageCircle size={30}/><h3>Could not load group discussions.</h3><p>{state.error.message}</p></div>;
+  return <div><div className="discussion-sort"><strong>{state.topics.length} discussions</strong><a href={`/community/new?group_id=${group.id}`}>+ Start Discussion in This Group</a></div>{state.topics.length ? <div className="community-topic-list">{state.topics.map((topic) => <CommunityTopicRow topic={topic} category={topic.forum_categories} key={topic.id}/>)}</div> : <div className="group-tab-empty"><MessageCircle size={30}/><h3>No discussions yet.</h3><p>Start the first discussion for {group.name}.</p><a className="button primary" href={`/community/new?group_id=${group.id}`}>Start Discussion</a></div>}</div>;
 }
 
 function GroupWidget({title,children}) {
@@ -1879,31 +1950,352 @@ function Resources() {
   );
 }
 
+function useForumCategories() {
+  const [state, setState] = React.useState({ categories: fallbackCommunityCategories, loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ categories: fallbackCommunityCategories, loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    supabase.from("forum_categories").select("*").eq("is_active", true).order("display_order", { ascending: true }).then(({ data, error }) => {
+      if (!cancelled) setState({ categories: data?.length ? data : fallbackCommunityCategories, loading: false, error });
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
+function useForumStats(userId) {
+  const [state, setState] = React.useState({ stats: {}, loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ stats: {}, loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    Promise.all([
+      supabase.from("forum_topics").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabase.from("forum_replies").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      userId ? supabase.from("forum_bookmarks").select("*", { count: "exact", head: true }).eq("profile_id", userId) : Promise.resolve({ count: 0 })
+    ]).then(([topics, replies, members, bookmarks]) => {
+      if (!cancelled) setState({ stats: { topics: topics.count || 0, replies: replies.count || 0, members: members.count || 0, bookmarks: bookmarks.count || 0 }, loading: false, error: topics.error || replies.error || members.error || bookmarks.error });
+    });
+    return () => { cancelled = true; };
+  }, [userId]);
+  return state;
+}
+
+const fallbackContributors = [
+  { id: "fallback-umesh", name: "Umesh", initials: "UM", score: 0 },
+  { id: "fallback-prajwal", name: "Prajwal", initials: "PR", score: 0 },
+  { id: "fallback-vasant", name: "Vasant", initials: "VA", score: 0 },
+  { id: "fallback-shreelakshmee", name: "Shreelakshmee", initials: "SH", score: 0 }
+];
+
+const fallbackActiveMembers = fallbackContributors.map((member) => ({ ...member, activity: "recently" }));
+
+function useForumContributors(reloadKey) {
+  const [state, setState] = React.useState({ contributors: fallbackContributors, loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ contributors: fallbackContributors, loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    const addContributor = (map, profile, points) => {
+      if (!profile?.id) return;
+      const name = profile.display_name || profile.username || "Community member";
+      const current = map.get(profile.id) || { id: profile.id, name, initials: forumInitials(name), score: 0 };
+      current.score += points;
+      map.set(profile.id, current);
+    };
+    const load = async () => {
+      const [topicsResult, repliesResult] = await Promise.all([
+        supabase
+          .from("forum_topics")
+          .select("author_id, like_count, profiles!forum_topics_author_id_fkey ( id, username, display_name, avatar_url, role )")
+          .is("deleted_at", null)
+          .limit(200),
+        supabase
+          .from("forum_replies")
+          .select("author_id, like_count, profiles!forum_replies_author_id_fkey ( id, username, display_name, avatar_url, role )")
+          .is("deleted_at", null)
+          .limit(500)
+      ]);
+      if (topicsResult.error || repliesResult.error) throw topicsResult.error || repliesResult.error;
+      const contributorMap = new Map();
+      (topicsResult.data || []).forEach((topic) => addContributor(contributorMap, topic.profiles, 10 + (topic.like_count || 0) * 2));
+      (repliesResult.data || []).forEach((reply) => addContributor(contributorMap, reply.profiles, 3 + (reply.like_count || 0) * 2));
+      const contributors = [...contributorMap.values()].sort((a, b) => b.score - a.score).slice(0, 5);
+      if (!cancelled) setState({ contributors: contributors.length ? contributors : fallbackContributors, loading: false, error: null });
+    };
+    setState((current) => ({ ...current, loading: true, error: null }));
+    load().catch((error) => {
+      if (!cancelled) setState({ contributors: fallbackContributors, loading: false, error });
+    });
+    return () => { cancelled = true; };
+  }, [reloadKey]);
+  return state;
+}
+
+const inferForumTagSlugs = (topic) => {
+  const text = `${topic.title || ""} ${topic.body || ""} ${topic.forum_categories?.slug || ""} ${topic.forum_categories?.name || ""}`.toLowerCase();
+  const tags = new Set();
+  if (topic.forum_categories?.slug) tags.add(topic.forum_categories.slug);
+  if (text.includes("ai")) tags.add("ai");
+  if (text.includes("fund") || text.includes("investor") || text.includes("angel")) tags.add("fundraising");
+  if (text.includes("legal") || text.includes("compliance")) tags.add("legal");
+  if (text.includes("product") || text.includes("onboarding")) tags.add("product");
+  if (text.includes("hiring") || text.includes("operations")) tags.add("operations");
+  if (text.includes("agri")) tags.add("agritech");
+  if (text.includes("saas")) tags.add("saas");
+  if (text.includes("marketing") || text.includes("customer")) tags.add("marketing");
+  return [...tags].slice(0, 4);
+};
+
+async function backfillForumTopicTags(topics, userId) {
+  if (!supabase || !userId || !topics.length) return;
+  const missingTagTopics = topics.filter((topic) => !(topic.forum_topic_tags || []).length);
+  if (!missingTagTopics.length) return;
+  const neededSlugs = [...new Set(missingTagTopics.flatMap(inferForumTagSlugs))];
+  if (!neededSlugs.length) return;
+  const { data: tags, error } = await supabase.from("interest_tags").select("id, slug, label").in("slug", neededSlugs);
+  if (error || !tags?.length) return;
+  const tagBySlug = new Map(tags.map((tag) => [tag.slug, tag.id]));
+  const rows = missingTagTopics.flatMap((topic) => inferForumTagSlugs(topic).map((slug) => tagBySlug.get(slug)).filter(Boolean).map((tagId) => ({ topic_id: topic.id, tag_id: tagId })));
+  if (rows.length) await supabase.from("forum_topic_tags").insert(rows);
+}
+
+function useForumActiveMembers(reloadKey) {
+  const [state, setState] = React.useState({ members: fallbackActiveMembers, loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ members: fallbackActiveMembers, loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    const load = async () => {
+      const [topicsResult, repliesResult] = await Promise.all([
+        supabase
+          .from("forum_topics")
+          .select("created_at, profiles!forum_topics_author_id_fkey ( id, username, display_name, avatar_url, role )")
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("forum_replies")
+          .select("created_at, profiles!forum_replies_author_id_fkey ( id, username, display_name, avatar_url, role )")
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false })
+          .limit(40)
+      ]);
+      if (topicsResult.error || repliesResult.error) throw topicsResult.error || repliesResult.error;
+      const activeMap = new Map();
+      [...(topicsResult.data || []), ...(repliesResult.data || [])].forEach((item) => {
+        const profile = item.profiles;
+        if (!profile?.id) return;
+        const current = activeMap.get(profile.id);
+        if (current && new Date(current.created_at) >= new Date(item.created_at)) return;
+        const name = profile.display_name || profile.username || "Community member";
+        activeMap.set(profile.id, { id: profile.id, name, initials: forumInitials(name), created_at: item.created_at, activity: relativeTime(item.created_at) });
+      });
+      const members = [...activeMap.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+      if (!cancelled) setState({ members: members.length ? members : fallbackActiveMembers, loading: false, error: null });
+    };
+    setState((current) => ({ ...current, loading: true, error: null }));
+    load().catch((error) => {
+      if (!cancelled) setState({ members: fallbackActiveMembers, loading: false, error });
+    });
+    return () => { cancelled = true; };
+  }, [reloadKey]);
+  return state;
+}
+
+function useForumNeedsAnswers(reloadKey) {
+  const [state, setState] = React.useState({ topics: [], loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ topics: fallbackCommunityTopics.filter((topic) => topic.topic_type === "question" && !topic.best_answer_reply_id), loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    supabase
+      .from("forum_topics")
+      .select("id, slug, title, reply_count, like_count, last_activity_at, created_at, topic_type, best_answer_reply_id")
+      .eq("topic_type", "question")
+      .is("best_answer_reply_id", null)
+      .is("deleted_at", null)
+      .order("reply_count", { ascending: true })
+      .order("last_activity_at", { ascending: false })
+      .limit(5)
+      .then(({ data, error }) => {
+        if (!cancelled) setState({ topics: data || [], loading: false, error });
+      });
+    return () => { cancelled = true; };
+  }, [reloadKey]);
+  return state;
+}
+
+const FORUM_PAGE_SIZE = 8;
+
+function buildForumTopicRequest() {
+  return supabase
+    .from("forum_topics")
+    .select("*, profiles!forum_topics_author_id_fkey ( id, username, display_name, avatar_url, role ), forum_categories ( id, slug, name, color_hex ), forum_topic_tags ( interest_tags ( id, label, slug ) )", { count: "exact" })
+    .is("deleted_at", null)
+    .is("group_id", null);
+}
+
+function applyForumTopicFilters(request, { activeCategory, activeTab, activePostType, sort, bookmarkIds }) {
+  let nextRequest = request;
+  if (activeCategory !== "All") nextRequest = nextRequest.eq("category_id", activeCategory);
+  if (activeTab === "Featured") nextRequest = nextRequest.eq("is_pinned", true);
+  if (activePostType) nextRequest = nextRequest.eq("topic_type", activePostType);
+  if (bookmarkIds) nextRequest = nextRequest.in("id", bookmarkIds);
+  if (sort === "likes") nextRequest = nextRequest.order("like_count", { ascending: false });
+  else if (sort === "unanswered") nextRequest = nextRequest.eq("topic_type", "question").eq("reply_count", 0).order("created_at", { ascending: false });
+  else nextRequest = nextRequest.order("is_pinned", { ascending: false }).order("last_activity_at", { ascending: false });
+  return nextRequest;
+}
+
+function useForumTopics({ activeCategory, activeTab, activeTag, activeTagCategorySlug, activePostType, query, sort, userId, page, reloadKey }) {
+  const [state, setState] = React.useState({ topics: fallbackCommunityTopics, total: 0, loading: true, error: null, usedFallbackSearch: false });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ topics: fallbackCommunityTopics, total: fallbackCommunityTopics.length, loading: false, error: new Error("Supabase is not configured."), usedFallbackSearch: false });
+      return undefined;
+    }
+    let cancelled = false;
+    const load = async () => {
+      const cleanQuery = query.trim();
+      const from = 0;
+      const to = page * FORUM_PAGE_SIZE - 1;
+      let bookmarkIds = null;
+      if (activeTab === "Following" && userId) {
+        const { data: bookmarks, error: bookmarkError } = await supabase.from("forum_bookmarks").select("topic_id").eq("profile_id", userId);
+        if (bookmarkError) throw bookmarkError;
+        bookmarkIds = (bookmarks || []).map((bookmark) => bookmark.topic_id);
+        if (!bookmarkIds.length) {
+          if (!cancelled) setState({ topics: [], total: 0, loading: false, error: null, usedFallbackSearch: false });
+          return;
+        }
+      }
+      let tagTopicIds = null;
+      let tagCategoryIds = null;
+      let useTagTextFallback = false;
+      if (activeTag) {
+        const [taggedResult, categoryResult] = await Promise.all([
+          supabase
+            .from("forum_topic_tags")
+            .select("topic_id, interest_tags!inner ( slug, label )")
+            .or(`slug.eq.${activeTag},label.eq.${activeTag}`, { foreignTable: "interest_tags" }),
+          activeTagCategorySlug ? supabase.from("forum_categories").select("id").eq("slug", activeTagCategorySlug) : Promise.resolve({ data: [] })
+        ]);
+        const { data: taggedTopics, error: taggedError } = taggedResult;
+        const { data: taggedCategories, error: categoryError } = categoryResult;
+        if (taggedError) throw taggedError;
+        if (categoryError) throw categoryError;
+        tagTopicIds = [...new Set((taggedTopics || []).map((item) => item.topic_id).filter(Boolean))];
+        tagCategoryIds = [...new Set((taggedCategories || []).map((category) => category.id).filter(Boolean))];
+        useTagTextFallback = !tagTopicIds.length && !tagCategoryIds.length;
+      }
+      let request = applyForumTopicFilters(buildForumTopicRequest(), { activeCategory, activeTab, activePostType, sort, bookmarkIds }).range(from, to);
+      if (tagCategoryIds?.length) request = request.in("category_id", tagCategoryIds);
+      if (tagTopicIds?.length) request = request.in("id", tagTopicIds);
+      if (useTagTextFallback) request = request.or(`title.ilike.%${activeTag}%,body.ilike.%${activeTag}%`);
+      if (cleanQuery) request = request.textSearch("body_search", cleanQuery, { type: "websearch" });
+      let { data, error, count } = await request;
+      let usedFallbackSearch = false;
+      if (!error && cleanQuery && (!data || data.length === 0)) {
+        const escaped = cleanQuery.replaceAll("%", "\\%").replaceAll("_", "\\_");
+        let fallbackRequest = applyForumTopicFilters(buildForumTopicRequest(), { activeCategory, activeTab, activePostType, sort, bookmarkIds })
+          .or(`title.ilike.%${escaped}%,body.ilike.%${escaped}%`)
+          .range(from, to);
+        if (tagCategoryIds?.length) fallbackRequest = fallbackRequest.in("category_id", tagCategoryIds);
+        if (tagTopicIds?.length) fallbackRequest = fallbackRequest.in("id", tagTopicIds);
+        if (useTagTextFallback) fallbackRequest = fallbackRequest.or(`title.ilike.%${activeTag}%,body.ilike.%${activeTag}%`);
+        const fallbackResult = await fallbackRequest;
+        data = fallbackResult.data;
+        error = fallbackResult.error;
+        count = fallbackResult.count;
+        usedFallbackSearch = true;
+      }
+      if (error) throw error;
+      const topics = data || [];
+      const repairedTopics = userId
+        ? await Promise.all(topics.map(async (topic) => {
+          if (!shouldRepairForumSlug(topic)) return topic;
+          const readableSlug = createForumSlug(topic.title, topic.id);
+          const { data: updatedTopic, error: repairError } = await supabase
+            .from("forum_topics")
+            .update({ slug: readableSlug })
+            .eq("id", topic.id)
+            .select("slug")
+            .single();
+          return repairError || !updatedTopic?.slug ? topic : { ...topic, slug: updatedTopic.slug };
+        }))
+        : topics;
+      if (userId) backfillForumTopicTags(repairedTopics, userId).catch((error) => console.warn("Forum tag backfill skipped", error.message));
+      const displayTopics = repairedTopics.map((topic) => {
+        if ((topic.forum_topic_tags || []).length) return topic;
+        return { ...topic, forum_topic_tags: inferForumTagSlugs(topic).map((slug) => ({ interest_tags: { slug, label: slug } })) };
+      });
+      if (!cancelled) setState({ topics: displayTopics, total: count || 0, loading: false, error: null, usedFallbackSearch });
+    };
+    setState((current) => ({ ...current, loading: true, error: null }));
+    load().catch((error) => {
+      if (!cancelled) setState({ topics: fallbackCommunityTopics, total: fallbackCommunityTopics.length, loading: false, error, usedFallbackSearch: false });
+    });
+    return () => { cancelled = true; };
+  }, [activeCategory, activeTab, activeTag, activeTagCategorySlug, activePostType, query, sort, userId, page, reloadKey]);
+  return state;
+}
+
 function CommunityPage() {
   const { user } = useAuth();
-  const [composerOpen, setComposerOpen] = React.useState(false);
   const [activeCategory, setActiveCategory] = React.useState("All");
+  const [activeTab, setActiveTab] = React.useState("All");
+  const [activeTag, setActiveTag] = React.useState("");
+  const [activePostType, setActivePostType] = React.useState("");
   const [query, setQuery] = React.useState("");
-  const [sort, setSort] = React.useState("latest.json?page=0");
-  const categoriesState = useCommunitySWR("categories.json", { category_list: { categories: fallbackCommunityCategories } });
-  const statsState = useCommunitySWR("site/statistics.json", {});
-  const topicsState = useCommunitySWR(sort, { topic_list: { topics: fallbackCommunityTopics } });
-  const trendingState = useCommunitySWR("top.json?period=weekly", { topic_list: { topics: fallbackCommunityTopics.slice(0, 5) } });
-  const liveCategories = categoriesState.data?.category_list?.categories || [];
-  const categories = liveCategories.length >= fallbackCommunityCategories.length ? liveCategories : fallbackCommunityCategories;
+  const [sort, setSort] = React.useState("latest");
+  const [page, setPage] = React.useState(1);
+  const [reloadKey, setReloadKey] = React.useState(0);
+  const { categories, loading: categoriesLoading, error: categoriesError } = useForumCategories();
+  const { stats, loading: statsLoading, error: statsError } = useForumStats(user?.id);
+  const { contributors, loading: contributorsLoading } = useForumContributors(reloadKey);
+  const { members: activeMembers, loading: activeMembersLoading } = useForumActiveMembers(reloadKey);
+  const { topics: needsAnswerTopics, loading: needsAnswersLoading } = useForumNeedsAnswers(reloadKey);
+  const tagCategoryAliases = { ai: "technology", funding: "fundraising", finance: "fundraising" };
+  const tagCategorySlug = tagCategoryAliases[activeTag] || activeTag;
+  const categorySlugs = new Set(["fundraising", "product", "legal", "marketing", "operations", "technology", "general"]);
+  const activeTagCategorySlug = activeTag && categorySlugs.has(tagCategorySlug) ? tagCategorySlug : "";
+  const { topics, total, loading: topicsLoading, error: topicsError, usedFallbackSearch } = useForumTopics({ activeCategory, activeTab, activeTag, activeTagCategorySlug, activePostType, query, sort, userId: user?.id, page, reloadKey });
   const categoryMap = new Map(categories.map((category) => [category.id, category]));
-  const allTopics = topicsState.data?.topic_list?.topics?.length ? topicsState.data.topic_list.topics : fallbackCommunityTopics;
-  const topics = activeCategory === "All" ? allTopics : allTopics.filter((topic) => categoryMap.get(topic.category_id)?.name === activeCategory);
-  const offline = Boolean(categoriesState.error || topicsState.error || statsState.error);
-  const searchResults = query.trim() ? topics.filter((topic) => topic.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [];
-  const startDiscussion = () => {
-    if (!user) {
-      window.location.href = `/login?next=${encodeURIComponent("/community")}`;
-      return;
-    }
-    setComposerOpen(true);
+  const activeCategoryName = activeCategory === "All" ? "" : categories.find((category) => category.id === activeCategory)?.name || "selected category";
+  const activeFilterLabels = [activeCategoryName, activeTag && `#${activeTag}`, activePostType && `${topicTypeIcon(activePostType)} ${activePostType}`, query.trim() && `"${query.trim()}"`, activeTab !== "All" && activeTab].filter(Boolean);
+  const clearCommunityFilters = () => {
+    setActiveCategory("All");
+    setActiveTag("");
+    setActivePostType("");
+    setQuery("");
+    setActiveTab("All");
+    setSort("latest");
   };
-
+  const offline = Boolean(categoriesError || topicsError || statsError);
+  const forumError = categoriesError || topicsError || statsError;
+  React.useEffect(() => {
+    if (forumError) console.error("Native forum query failed", forumError);
+  }, [forumError]);
+  React.useEffect(() => {
+    setPage(1);
+  }, [activeCategory, activeTab, activeTag, activePostType, query, sort]);
+  const startDiscussion = () => {
+    if (!user) window.location.href = `/login?next=${encodeURIComponent("/community/new")}`;
+    else window.location.href = "/community/new";
+  };
   return (
     <>
       <Header />
@@ -1911,115 +2303,130 @@ function CommunityPage() {
         <section className="community-header">
           <Breadcrumb items={["Community"]} />
           <div className="community-title-row">
-            <div><h1>Community Discussions</h1><p>Ask questions, share ideas, and learn from 5,200+ Karnataka founders.</p></div>
+            <div><h1>Community Discussions</h1><p>Ask questions, share ideas, and learn from Karnataka founders inside Mundhe Banni.</p></div>
             <div className="community-actions">
-              <a className="forum-link" href={discourseBaseUrl}>Go to Full Forum <ArrowUpRight size={14} /></a>
               <button onClick={startDiscussion}>+ Start Discussion</button>
-              <small className={offline ? "offline" : ""}><i></i>{offline ? "Forum offline - showing cached content" : "Forum live · Powered by Discourse"}</small>
+              <small className={offline ? "offline" : ""}><i></i>{offline ? "Forum schema unavailable - showing sample content" : "Native Mundhe Banni forum"}</small>
             </div>
           </div>
         </section>
-        {offline && <div className="community-warning">⚠️ Could not load live discussions. Showing cached content while the forum is unavailable.</div>}
-        <CommunityStats stats={statsState.data} loading={statsState.isLoading} offline={Boolean(statsState.error)} />
+        {offline && <div className="community-warning">The custom forum tables are not available yet or Supabase returned an error. <strong>{forumError?.message || "Check Supabase table grants, RLS, and relationships."}</strong></div>}
+        <CommunityStats stats={stats} loading={statsLoading} offline={offline} />
         <section className="community-tabs">
-          <nav>{["All", "Featured", "My Groups", "Following"].map((tab, index) => <button className={index === 0 ? "active" : ""} key={tab} onClick={() => index > 1 && !user && (window.location.href = `/login?next=${encodeURIComponent("/community")}`)}>{tab}{tab === "My Groups" && <span>3 new</span>}</button>)}</nav>
-          <label className="select-filter"><span>Sort:</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="latest.json?page=0">Latest</option><option value="top.json?period=all">Most Liked</option><option value="top.json?period=weekly">Trending</option><option value="latest.json?filter=unsolved">Unanswered</option></select></label>
+          <nav>{["All", "Featured", "My Groups", "Following"].map((tab) => <button className={activeTab === tab ? "active" : ""} key={tab} onClick={() => tab === "My Groups" ? window.location.href = "/groups" : !user && tab === "Following" ? window.location.href = `/login?next=${encodeURIComponent("/community")}` : setActiveTab(tab)}>{tab}{tab === "Following" && stats.bookmarks > 0 && <span>{stats.bookmarks}</span>}</button>)}</nav>
+          <label className="select-filter"><span>Sort:</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="latest">Latest</option><option value="likes">Most Liked</option><option value="unanswered">Unanswered</option></select></label>
           <div className="view-toggle"><button aria-label="Grid view"><Grid3X3 size={16} /></button><button className="active" aria-label="List view"><List size={17} /></button></div>
         </section>
         <section className="community-search-row">
-          <div className="community-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search discussions, questions, and ideas..." />{searchResults.length > 0 && <div className="search-popover">{searchResults.map((topic) => <a href={topicUrl(topic)} key={topic.id}><strong>{topic.title}</strong><span>{categoryMap.get(topic.category_id)?.name || "General"} · {topic.posts_count || 0} replies</span></a>)}<a href={`${discourseBaseUrl}/search?q=${encodeURIComponent(query)}`}>Search in full forum →</a></div>}</div>
-          <div className="filter-chips"><span>saas ×</span><span>fundraising ×</span><a href="#clear">Clear all</a></div>
+          <div className="community-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search discussions, questions, Kannada topics..." /></div>
+          <div className="filter-chips">{query.trim() || activeTag || activePostType ? <>{query.trim() && <span>{query.trim()} ×</span>}{activeTag && <span>#{activeTag} ×</span>}{activePostType && <span>{topicTypeIcon(activePostType)} {activePostType} ×</span>}<button onClick={() => { setQuery(""); setActiveTag(""); setActivePostType(""); }}>Clear</button></> : <><span>native forum</span><span>Supabase</span></>}</div>
         </section>
+        <CommunityCategoryFilter categories={categories} activeCategory={activeCategory} onCategory={setActiveCategory} loading={categoriesLoading} />
+        <CommunityTagFilter activeTag={activeTag} onTag={setActiveTag} />
+        <CommunityPostTypeFilter activePostType={activePostType} onPostType={setActivePostType} />
+        {usedFallbackSearch && <div className="community-search-note">Showing broader title/body matches for this search.</div>}
         <section className="community-layout">
-          <CommunityLeftRail categories={categories} activeCategory={activeCategory} onCategory={setActiveCategory} loading={categoriesState.isLoading} />
-          <CommunityFeed topics={topics} categories={categoryMap} loading={topicsState.isLoading} offline={Boolean(topicsState.error)} onLogin={startDiscussion} />
-          <CommunityRightRail topics={trendingState.data?.topic_list?.topics || fallbackCommunityTopics} categories={categoryMap} />
+          <CommunityLeftRail categories={categories} activeCategory={activeCategory} onCategory={setActiveCategory} activeTag={activeTag} onTag={setActiveTag} activePostType={activePostType} onPostType={setActivePostType} loading={categoriesLoading} />
+          <CommunityFeed topics={topics} total={total} page={page} onLoadMore={() => setPage((value) => value + 1)} categories={categoryMap} loading={topicsLoading} offline={Boolean(topicsError)} activeFilterLabels={activeFilterLabels} onClearFilters={clearCommunityFilters} onReload={() => setReloadKey((key) => key + 1)} />
+          <CommunityRightRail topics={topics.length ? topics : fallbackCommunityTopics} activeMembers={activeMembers} activeMembersLoading={activeMembersLoading} needsAnswerTopics={needsAnswerTopics} needsAnswersLoading={needsAnswersLoading} contributors={contributors} contributorsLoading={contributorsLoading} />
         </section>
       </main>
       <Footer />
       <button className="community-mobile-start" onClick={startDiscussion}>+ Start Discussion</button>
-      {composerOpen && <NewDiscussionModal categories={categories} user={user} onClose={() => setComposerOpen(false)} />}
     </>
   );
 }
 
 function CommunityStats({ stats, loading, offline }) {
   const values = [
-    [MessageCircle, stats?.topics_count || "2,840+", "Total Discussions"],
-    [FileText, stats?.posts_count || "18,200+", "Total Replies"],
-    [Users, stats?.users_count || "5,200+", "Active Members"],
-    [TrendingUp, stats?.topics_7_days || "148", "New This Week"],
-    [CheckCircle2, "940+", "Questions Answered"]
+    [MessageCircle, stats?.topics ?? "—", "Total Discussions"],
+    [FileText, stats?.replies ?? "—", "Total Replies"],
+    [Users, stats?.members ?? "—", "Members"],
+    [TrendingUp, "v1", "Native Forum"],
+    [CheckCircle2, offline ? "Setup" : "Live", "Forum Status"]
   ];
-  return <section className="community-stats">{values.map(([Icon, value, label]) => <div key={label}>{loading ? <span className="skeleton short"></span> : <><Icon size={22} /><p><strong>{offline ? `~${value}` : value}</strong><span>{label}</span></p></>}</div>)}</section>;
+  return <section className="community-stats">{values.map(([Icon, value, label]) => <div key={label}>{loading ? <span className="skeleton short"></span> : <><Icon size={22} /><p><strong>{value}</strong><span>{label}</span></p></>}</div>)}</section>;
 }
 
-function CommunityLeftRail({ categories, activeCategory, onCategory, loading }) {
-  const tags = ["saas", "fundraising", "legal", "fintech", "product", "agritech", "operations", "hiring"];
+function CommunityCategoryFilter({ categories, activeCategory, onCategory, loading }) {
+  if (loading) return null;
+  return <div className="community-category-strip"><button className={activeCategory === "All" ? "active" : ""} onClick={() => onCategory("All")}><span style={{ background: "#e58a2b" }}></span>All</button>{categories.map((category) => <button className={activeCategory === category.id ? "active" : ""} onClick={() => onCategory(category.id)} key={category.id}><span style={{ background: categoryColor(category) }}></span>{category.name}</button>)}</div>;
+}
+
+function CommunityLeftRail({ categories, activeCategory, onCategory, activeTag, onTag, activePostType, onPostType, loading }) {
+  const postTypes = [["general", "💬", "General"], ["question", "❓", "Questions"], ["announcement", "📢", "Announcements"], ["idea", "💡", "Ideas"]];
   return (
     <aside className="community-left-rail">
       <h2>Categories</h2>
-      {loading ? <SkeletonList /> : <div className="community-category-list"><button className={activeCategory === "All" ? "active" : ""} onClick={() => onCategory("All")}><i style={{ background: "#e58a2b" }}></i><span>All</span><small>{categories.reduce((sum, category) => sum + (category.topic_count || 0), 0)}</small></button>{categories.map((category) => <button className={activeCategory === category.name ? "active" : ""} key={category.id} onClick={() => onCategory(category.name)} style={{ "--category-color": categoryColor(category) }}><i></i><span>{category.name}</span><small>{category.topic_count || 0}</small></button>)}</div>}
-      <a href={`${discourseBaseUrl}/categories`}>View All Categories →</a>
+      {loading ? <SkeletonList /> : <div className="community-category-list"><button className={activeCategory === "All" ? "active" : ""} onClick={() => onCategory("All")}><i style={{ background: "#e58a2b" }}></i><span>All</span><small>{categories.reduce((sum, category) => sum + (category.topic_count || 0), 0)}</small></button>{categories.map((category) => <button className={activeCategory === category.id ? "active" : ""} key={category.id} onClick={() => onCategory(category.id)} style={{ "--category-color": categoryColor(category) }}><i></i><span>{category.name}</span><small>{category.topic_count || 0}</small></button>)}</div>}
+      <a href="/community/new">Start in a category →</a>
       <hr />
       <h2>Popular Tags</h2>
-      <div className="community-tags">{tags.map((tag, index) => <button className={index < 2 ? "active" : ""} key={tag}>{tag}</button>)}</div>
+      <CommunityTagFilter activeTag={activeTag} onTag={onTag} compact />
       <hr />
       <h2>Post Type</h2>
-      {["💬 All Types", "❓ Questions only", "📢 Announcements", "💡 Ideas"].map((type, index) => <label className="type-check" key={type}><input type="checkbox" defaultChecked={index === 0} />{type}</label>)}
+      {postTypes.map(([value, icon, label]) => <button className={`type-check ${activePostType === value ? "active" : ""}`} onClick={() => onPostType(activePostType === value ? "" : value)} key={value}><span>{icon}</span>{label}</button>)}
       <hr />
       <h2>My Activity</h2>
-      <p className="login-note">Login to see your activity</p>
+      <p className="login-note">Bookmarks appear in Following.</p>
     </aside>
   );
 }
 
-function CommunityFeed({ topics, categories, loading, offline, onLogin }) {
-  const pinned = topics[0] || fallbackCommunityTopics[0];
+function CommunityTagFilter({ activeTag, onTag, compact = false }) {
+  const tags = ["saas", "fundraising", "legal", "product", "agritech", "operations", "hiring", "ai"];
+  return <div className={compact ? "community-tags compact" : "community-tag-strip"}>{tags.map((tag) => <button className={activeTag === tag ? "active" : ""} onClick={() => onTag(activeTag === tag ? "" : tag)} key={tag}>#{tag}</button>)}</div>;
+}
+
+function CommunityPostTypeFilter({ activePostType, onPostType }) {
+  const postTypes = [["general", "💬", "General"], ["question", "❓", "Questions"], ["announcement", "📢", "Announcements"], ["idea", "💡", "Ideas"]];
+  return <div className="community-post-type-strip">{postTypes.map(([value, icon, label]) => <button className={activePostType === value ? "active" : ""} onClick={() => onPostType(activePostType === value ? "" : value)} key={value}><span>{icon}</span>{label}</button>)}</div>;
+}
+
+function CommunityFeed({ topics, total, onLoadMore, categories, loading, offline, activeFilterLabels, onClearFilters }) {
+  const pinned = topics.find((topic) => topic.is_pinned) || topics[0];
+  const hasMore = topics.length < total;
+  const hasFilters = activeFilterLabels?.length > 0;
   return (
     <section className="community-feed">
-      {offline && <div className="feed-warning">⚠️ Could not load discussions. The forum may be temporarily unavailable. <a href="/community">Try refreshing →</a></div>}
+      {offline && <div className="feed-warning">Could not load live forum topics. Showing sample content until the forum schema is ready.</div>}
       {loading ? <SkeletonList rows={5} /> : <>
-        <article className="pinned-discourse-post"><small>📌 Pinned</small><a href={topicUrl(pinned)}>{pinned.title}</a><p>Welcome to the Mundhe Banni community forum. Use this space to ask, share, and help other Karnataka founders move faster.</p><CommunityTopicMeta topic={pinned} category={categories.get(pinned.category_id)} /></article>
-        <div className="community-topic-list">{topics.map((topic) => <CommunityTopicRow topic={topic} category={categories.get(topic.category_id)} onLogin={onLogin} key={topic.id} />)}</div>
-        <button className="load-more">Load More Discussions</button>
+        {pinned && <article className="pinned-discourse-post"><small>📌 Featured</small><a href={topicUrl(pinned)}>{pinned.title}</a><p>{stripMarkdown(pinned.body).slice(0, 180)}</p><CommunityTopicMeta topic={pinned} category={pinned.forum_categories || categories.get(pinned.category_id)} /></article>}
+        <div className="community-topic-list">{topics.length ? topics.map((topic) => <CommunityTopicRow topic={topic} category={topic.forum_categories || categories.get(topic.category_id)} key={topic.id} />) : <div className="group-tab-empty forum-empty-state"><MessageCircle size={30}/><h3>{hasFilters ? "No discussions match these filters." : "No discussions yet."}</h3><p>{hasFilters ? `Active filters: ${activeFilterLabels.join(", ")}` : "Start the first topic for this view."}</p>{hasFilters ? <button className="button secondary" onClick={onClearFilters}>Clear Filters</button> : <a className="button primary" href="/community/new">Start Discussion</a>}</div>}</div>
+        {topics.length > 0 && <div className="community-feed-footer"><span>Showing {topics.length} of {total || topics.length} discussions</span>{hasMore && <button className="load-more" onClick={onLoadMore}>Load More Discussions</button>}</div>}
       </>}
     </section>
   );
 }
 
-function CommunityTopicRow({ topic, category, onLogin }) {
-  const type = topic.tags?.find((tag) => tag.startsWith("type-"))?.replace("type-", "") || "general";
-  const typeIcon = { question: "?", announcement: "📢", idea: "💡", general: "💬" }[type] || "💬";
-  const author = topic.posters?.[0]?.user?.name || topic.posters?.[0]?.user?.username || "Community member";
-  const tags = (topic.tags || []).filter((tag) => !tag.startsWith("type-")).slice(0, 3);
+function CommunityTopicRow({ topic, category }) {
+  const tags = topicTags(topic).slice(0, 3);
   return (
-    <article className={`community-topic-row ${type}`}>
-      <i>{typeIcon}</i>
+    <article className={`community-topic-row ${topic.topic_type || "general"}`}>
+      <i>{topicTypeIcon(topic.topic_type)}</i>
       <div>
-        <div className="topic-badges"><span style={{ "--category-color": categoryColor(category) }}>{category?.name || "General"}</span>{type === "question" && topic.posts_count > 2 && <em>✓ Answered</em>}</div>
+        <div className="topic-badges"><span style={{ "--category-color": categoryColor(category) }}>{category?.name || "General"}</span>{topic.best_answer_reply_id && <em>✓ Answered</em>}{topic.is_pinned && <em>📌 Pinned</em>}</div>
         <a className="topic-title" href={topicUrl(topic)}>{topic.title}</a>
-        <p>{stripHtml(topic.excerpt || "Join this discussion with other founders and operators from the Mundhe Banni community.").slice(0, 120)}...</p>
+        <p>{stripMarkdown(topic.body || "").slice(0, 150)}{(topic.body || "").length > 150 ? "..." : ""}</p>
         <div className="topic-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-        <small><b>{author}</b> · {relativeTime(topic.last_posted_at || topic.created_at)} · <button>Quick Preview</button></small>
+        <small><b>{forumAuthorName(topic)}</b> · {relativeTime(topic.last_activity_at || topic.created_at)}</small>
       </div>
-      <aside><span>💬 {topic.posts_count || 0}</span><span>👁 {topic.views || 0}</span><span>▲ {topic.like_count || 0}</span><a href={topicUrl(topic)} aria-label="Open topic"><Bookmark size={16} /></a></aside>
+      <aside><span>💬 {topic.reply_count || 0}</span><span>👁 {topic.view_count || 0}</span><span>▲ {topic.like_count || 0}</span><a href={topicUrl(topic)} aria-label="Open topic"><Bookmark size={16} /></a></aside>
     </article>
   );
 }
 
 function CommunityTopicMeta({ topic, category }) {
-  return <div className="community-topic-meta"><span style={{ "--category-color": categoryColor(category) }}>{category?.name || "General"}</span><small>{(topic.tags || []).filter((tag) => !tag.startsWith("type-")).slice(0, 2).join(" · ") || "community"}</small><small>{topic.posts_count || 0} replies · {relativeTime(topic.last_posted_at)}</small></div>;
+  return <div className="community-topic-meta"><span style={{ "--category-color": categoryColor(category) }}>{category?.name || "General"}</span><small>{topicTags(topic).slice(0, 2).join(" · ") || topic.topic_type || "general"}</small><small>{topic.reply_count || 0} replies · {relativeTime(topic.last_activity_at || topic.created_at)}</small></div>;
 }
 
-function CommunityRightRail({ topics, categories }) {
+function CommunityRightRail({ topics, activeMembers, activeMembersLoading, needsAnswerTopics, needsAnswersLoading, contributors, contributorsLoading }) {
   return (
     <aside className="community-right-rail">
-      <CommunityWidget title="🔥 Trending This Week">{topics.slice(0, 5).map((topic, index) => <a className="trend-row" href={topicUrl(topic)} key={topic.id}><b>{index + 1}</b><span>{topic.title}<small>▲ {topic.like_count || 0} · 💬 {topic.posts_count || 0}</small></span></a>)}<a href={`${discourseBaseUrl}/top`}>View All Trending →</a></CommunityWidget>
-      <CommunityWidget title="👥 Active Today"><div className="active-avatars">{["VA", "RK", "SP", "AK", "MS", "RS"].map((avatar) => <span key={avatar}>{avatar}</span>)}</div><p>42 members posted today</p></CommunityWidget>
-      <CommunityWidget title="❓ Needs Answers">{fallbackCommunityTopics.filter((topic) => topic.tags.includes("type-question")).slice(0, 3).map((topic) => <a className="need-row" href={topicUrl(topic)} key={topic.id}>{topic.title}<small>Needs more answers</small></a>)}</CommunityWidget>
-      <CommunityWidget title="💬 My Groups"><p className="login-note">Join groups to see activity here</p></CommunityWidget>
-      <CommunityWidget title="⭐ Top Contributors">{["Vikram Anand", "Dr. Ravi Kumar", "Sneha Patil", "Rohit Shenoy", "Meera Shetty"].map((name, index) => <div className="contributor-row" key={name}><b>{index + 1}</b><span>{name.slice(0, 2).toUpperCase()}</span><strong>{name}</strong><em>★ {900 - index * 70}</em></div>)}</CommunityWidget>
+      <CommunityWidget title="🔥 Trending">{topics.slice(0, 5).map((topic, index) => <a className="trend-row" href={topicUrl(topic)} key={topic.id}><b>{index + 1}</b><span>{topic.title}<small>▲ {topic.like_count || 0} · 💬 {topic.reply_count || 0}</small></span></a>)}</CommunityWidget>
+      <CommunityWidget title="👥 Active Today">{activeMembersLoading ? <SkeletonList rows={3} /> : <><div className="active-avatars">{activeMembers.map((member) => <span title={`${member.name} · ${member.activity}`} key={member.id}>{member.initials}</span>)}</div><div className="active-member-list">{activeMembers.slice(0, 3).map((member) => <p key={member.id}><strong>{member.name}</strong><small>{member.activity}</small></p>)}</div></>}</CommunityWidget>
+      <CommunityWidget title="❓ Needs Answers">{needsAnswersLoading ? <SkeletonList rows={3} /> : needsAnswerTopics.length ? needsAnswerTopics.map((topic) => <a className="need-row" href={topicUrl(topic)} key={topic.id}>{topic.title}<small>{topic.reply_count || 0} replies · needs accepted answer</small></a>) : <p>No unanswered questions right now.</p>}</CommunityWidget>
+      <CommunityWidget title="⭐ Top Contributors">{contributorsLoading ? <SkeletonList rows={3} /> : contributors.map((contributor, index) => <div className="contributor-row" key={contributor.id}><b>{index + 1}</b><span>{contributor.initials}</span><strong>{contributor.name}</strong><em>★ {contributor.score}</em></div>)}</CommunityWidget>
     </aside>
   );
 }
@@ -2028,62 +2435,292 @@ function CommunityWidget({ title, children }) {
   return <div className="community-widget"><h2>{title}</h2>{children}</div>;
 }
 
-function NewDiscussionModal({ categories, user, onClose }) {
+function CommunityNewTopicPage() {
+  const { user } = useAuth();
+  const { categories, loading } = useForumCategories();
+  const [groups, setGroups] = React.useState([]);
+  const [tags, setTags] = React.useState([]);
+  const [topicType, setTopicType] = React.useState("question");
   const [title, setTitle] = React.useState("");
-  const [raw, setRaw] = React.useState("");
-  const [categoryId, setCategoryId] = React.useState(categories.find((category) => category.name === "General")?.id || categories[0]?.id || "");
+  const [body, setBody] = React.useState("");
+  const [categoryId, setCategoryId] = React.useState("");
+  const [selectedTags, setSelectedTags] = React.useState([]);
+  const [groupId, setGroupId] = React.useState(new URLSearchParams(window.location.search).get("group_id") || "");
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    if (!categoryId && categories.length) setCategoryId(String(categories.find((category) => category.slug === "general")?.id || categories[0].id));
+  }, [categories, categoryId]);
+
+  React.useEffect(() => {
+    if (!supabase || !user) return undefined;
+    let cancelled = false;
+    Promise.all([
+      supabase.from("group_members").select("group_id, groups ( id, name )").eq("profile_id", user.id),
+      supabase.from("interest_tags").select("id, label, slug").order("label", { ascending: true }).limit(30)
+    ]).then(([groupResult, tagResult]) => {
+      if (!cancelled) {
+        setGroups((groupResult.data || []).map((membership) => membership.groups).filter(Boolean));
+        setTags(tagResult.data || []);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
   const submit = async (event) => {
     event.preventDefault();
     setError("");
-    if (title.trim().length < 15) {
-      setError("Please add a clear title with at least 15 characters.");
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
       return;
     }
-    if (raw.trim().length < 20) {
-      setError("Please add a few more details before posting.");
+    if (!supabase) {
+      setError("Supabase is not configured.");
+      return;
+    }
+    if (title.trim().length < 12 || body.trim().length < 20 || !categoryId) {
+      setError("Add a clear title, useful body, and category before posting.");
       return;
     }
     setSubmitting(true);
-    try {
-      const response = await fetch("/api/discourse/posts.json", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          raw: `${raw.trim()}\n\n_Posted from Mundhe Banni by ${user?.email || "a member"}._`,
-          category: categoryId ? Number(categoryId) : undefined
-        })
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setError(data.errors?.join(" ") || data.error || "Could not publish this discussion to Discourse.");
-        setSubmitting(false);
-        return;
-      }
-      const topicId = data.topic_id || data.topic?.id;
-      const topicSlug = data.topic_slug || data.topic?.slug || "topic";
-      window.location.href = topicId ? `${discourseBaseUrl}/t/${topicSlug}/${topicId}` : discourseNewTopicUrl;
-    } catch {
-      setError("Could not reach Discourse. Try again in a moment.");
+    const slug = createForumSlug(title);
+    const payload = {
+      slug,
+      title: title.trim(),
+      body: body.trim(),
+      topic_type: topicType,
+      category_id: Number(categoryId),
+      author_id: user.id,
+      group_id: groupId || null
+    };
+    const { data, error: topicError } = await supabase.from("forum_topics").insert(payload).select("id, slug").single();
+    if (topicError) {
+      setError(topicError.message);
       setSubmitting(false);
+      return;
     }
+    if (selectedTags.length) await supabase.from("forum_topic_tags").insert(selectedTags.map((tagId) => ({ topic_id: data.id, tag_id: Number(tagId) })));
+    await awardXp({ profile_id: user.id, action_type: "discussion_started", points: 10, reference_table: "forum_topics", reference_id: data.id });
+    window.location.href = `/community/t/${data.slug}`;
   };
 
+  if (!user) return <><Header/><main className="profile-signed-out"><Lock size={34}/><h1>Log in to start a discussion</h1><p>Forum posts are tied to your Mundhe Banni profile.</p><a className="button primary" href={`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`}>Log In</a></main><Footer/></>;
+
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="new-discussion-title">
-      <form className="community-login-modal discussion-composer" onSubmit={submit}>
-        <button type="button" className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
-        <h2 id="new-discussion-title">Start a Discussion</h2>
-        <p>This will create a topic in the Mundhe Banni Discourse forum using the server-side integration.</p>
-        <label>Title<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What do you want to discuss?" autoFocus required /></label>
-        <label>Category<select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
-        <label>Message<textarea value={raw} onChange={(event) => setRaw(event.target.value)} placeholder="Add context, question, or details for the community..." required /></label>
-        {error && <div className="login-error" role="alert"><strong>{error}</strong></div>}
-        <button className="primary-login" type="submit" disabled={submitting}>{submitting ? "Posting..." : "Post Discussion"}</button>
-      </form>
-    </div>
+    <>
+      <Header />
+      <main className="community-compose-page">
+        <Breadcrumb items={["Community", "New Topic"]} />
+        <section className="community-compose-card">
+          <div><span className="featured-pill">Native Forum</span><h1>Start a Discussion</h1><p>Use markdown for simple formatting. Keep the question specific so other founders can help quickly.</p></div>
+          <form className="discussion-composer-page" onSubmit={submit}>
+            <label>Topic Type<div className="topic-type-picker">{[["question", "Question"], ["announcement", "Announcement"], ["idea", "Idea"], ["general", "General"]].map(([value, label]) => <button type="button" className={topicType === value ? "active" : ""} onClick={() => setTopicType(value)} key={value}>{topicTypeIcon(value)} {label}</button>)}</div></label>
+            <label>Title<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What do you want to discuss?" required /></label>
+            <label>Category<select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} disabled={loading}>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></label>
+            <label>Scope<select value={groupId} onChange={(event) => setGroupId(event.target.value)}><option value="">Platform-wide</option>{groups.map((group) => <option value={group.id} key={group.id}>{group.name}</option>)}</select></label>
+            <label>Tags<div className="tag-picker">{tags.map((tag) => <button type="button" className={selectedTags.includes(String(tag.id)) ? "active" : ""} onClick={() => setSelectedTags((current) => current.includes(String(tag.id)) ? current.filter((id) => id !== String(tag.id)) : [...current, String(tag.id)])} key={tag.id}>{tag.label || tag.slug}</button>)}</div></label>
+            <label>Body<textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="Add context, what you tried, what kind of help you need, or the idea you want feedback on..." required /></label>
+            <small>Markdown supported: **bold**, *italic*, bullet lists, links, and headings.</small>
+            {error && <div className="login-error" role="alert"><strong>{error}</strong></div>}
+            <button className="primary-login" type="submit" disabled={submitting}>{submitting ? "Posting..." : "Post Topic"}</button>
+          </form>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+function CommunityTopicDetailPage({ slug }) {
+  const { user, profile } = useAuth();
+  const [state, setState] = React.useState({ topic: null, replies: [], liked: false, bookmarked: false, likedReplies: new Set(), loading: true, error: null });
+  const [replyBody, setReplyBody] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [replyError, setReplyError] = React.useState("");
+  const [confirmDelete, setConfirmDelete] = React.useState(null);
+  const isAdmin = isAdminProfile(profile);
+
+  const loadTopic = React.useCallback(async () => {
+    if (!supabase) {
+      setState({ topic: null, replies: [], liked: false, bookmarked: false, likedReplies: new Set(), loading: false, error: new Error("Supabase is not configured.") });
+      return;
+    }
+    setState((current) => ({ ...current, loading: true, error: null }));
+    const { data: topic, error } = await supabase
+      .from("forum_topics")
+      .select("*, profiles!forum_topics_author_id_fkey ( id, username, display_name, avatar_url, role ), forum_categories ( id, slug, name, color_hex ), forum_topic_tags ( interest_tags ( id, label, slug ) )")
+      .eq("slug", slug)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (error || !topic) {
+      setState({ topic: null, replies: [], liked: false, bookmarked: false, likedReplies: new Set(), loading: false, error: error || new Error("Topic not found.") });
+      return;
+    }
+    if (shouldRepairForumSlug(topic) && (topic.author_id === user?.id || isAdminProfile(profile))) {
+      const readableSlug = createForumSlug(topic.title, topic.id);
+      if (readableSlug !== topic.slug) {
+        const { data: repairedTopic, error: repairError } = await supabase
+          .from("forum_topics")
+          .update({ slug: readableSlug })
+          .eq("id", topic.id)
+          .select("slug")
+          .single();
+        if (!repairError && repairedTopic?.slug) {
+          topic.slug = repairedTopic.slug;
+          window.history.replaceState(null, "", `/community/t/${topic.slug}`);
+        }
+      }
+    }
+    await supabase.from("forum_topics").update({ view_count: (topic.view_count || 0) + 1 }).eq("id", topic.id);
+    const [repliesResult, likedResult, bookmarkResult, likedRepliesResult] = await Promise.all([
+      supabase.from("forum_replies").select("*, profiles!forum_replies_author_id_fkey ( id, username, display_name, avatar_url, role )").eq("topic_id", topic.id).is("deleted_at", null).order("created_at", { ascending: true }),
+      user ? supabase.from("forum_likes").select("id").eq("profile_id", user.id).eq("topic_id", topic.id).maybeSingle() : Promise.resolve({ data: null }),
+      user ? supabase.from("forum_bookmarks").select("topic_id").eq("profile_id", user.id).eq("topic_id", topic.id).maybeSingle() : Promise.resolve({ data: null }),
+      user ? supabase.from("forum_likes").select("reply_id").eq("profile_id", user.id).not("reply_id", "is", null) : Promise.resolve({ data: [] })
+    ]);
+    const replies = repliesResult.data || [];
+    const best = topic.best_answer_reply_id ? replies.find((reply) => reply.id === topic.best_answer_reply_id) : null;
+    const orderedReplies = best ? [best, ...replies.filter((reply) => reply.id !== best.id)] : replies;
+    setState({ topic, replies: orderedReplies, liked: Boolean(likedResult.data), bookmarked: Boolean(bookmarkResult.data), likedReplies: new Set((likedRepliesResult.data || []).map((like) => like.reply_id)), loading: false, error: repliesResult.error || likedRepliesResult.error || null });
+  }, [slug, user, profile]);
+
+  React.useEffect(() => { loadTopic(); }, [loadTopic]);
+
+  const toggleTopicLike = async () => {
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+    const result = state.liked
+      ? await supabase.from("forum_likes").delete().eq("profile_id", user.id).eq("topic_id", state.topic.id)
+      : await supabase.from("forum_likes").insert({ profile_id: user.id, topic_id: state.topic.id });
+    if (result.error) setReplyError(result.error.message);
+    loadTopic();
+  };
+  const toggleReplyLike = async (reply) => {
+    setReplyError("");
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+    const isLiked = state.likedReplies.has(reply.id);
+    const result = isLiked
+      ? await supabase.from("forum_likes").delete().eq("profile_id", user.id).eq("reply_id", reply.id)
+      : await supabase.from("forum_likes").insert({ profile_id: user.id, reply_id: reply.id });
+    if (result.error) setReplyError(result.error.message);
+    loadTopic();
+  };
+  const toggleBookmark = async () => {
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+    if (state.bookmarked) await supabase.from("forum_bookmarks").delete().eq("profile_id", user.id).eq("topic_id", state.topic.id);
+    else await supabase.from("forum_bookmarks").insert({ profile_id: user.id, topic_id: state.topic.id });
+    loadTopic();
+  };
+  const submitReply = async (event) => {
+    event.preventDefault();
+    setReplyError("");
+    if (!user) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+    if (replyBody.trim().length < 5) {
+      setReplyError("Add a little more detail before posting.");
+      return;
+    }
+    setSubmitting(true);
+    const { data, error } = await supabase.from("forum_replies").insert({ topic_id: state.topic.id, author_id: user.id, body: replyBody.trim() }).select("id").single();
+    if (!error && data) {
+      await awardXp({ profile_id: user.id, action_type: "reply_posted", points: 3, reference_table: "forum_replies", reference_id: data.id });
+      setReplyBody("");
+      loadTopic();
+    } else {
+      setReplyError(error?.message || "Could not post reply.");
+    }
+    setSubmitting(false);
+  };
+  const markBestAnswer = async (reply) => {
+    await supabase.from("forum_topics").update({ best_answer_reply_id: reply.id }).eq("id", state.topic.id);
+    await awardXp({ profile_id: reply.author_id, action_type: "best_answer_received", points: 25, reference_table: "forum_replies", reference_id: reply.id });
+    loadTopic();
+  };
+  const togglePin = async () => {
+    setReplyError("");
+    const { error } = await supabase.from("forum_topics").update({ is_pinned: !state.topic.is_pinned }).eq("id", state.topic.id);
+    if (error) {
+      console.error("Could not update pinned state", error);
+      setReplyError(error.message);
+      return;
+    }
+    loadTopic();
+  };
+  const softDeleteTopic = async () => {
+    setReplyError("");
+    const { error } = await supabase.from("forum_topics").update({ deleted_at: new Date().toISOString() }).eq("id", state.topic.id);
+    if (error) {
+      console.error("Could not delete topic", error);
+      setReplyError(error.message);
+      return;
+    }
+    window.location.href = "/community";
+  };
+  const softDeleteReply = async (reply) => {
+    setReplyError("");
+    const { error } = await supabase.from("forum_replies").update({ deleted_at: new Date().toISOString() }).eq("id", reply.id);
+    if (error) {
+      console.error("Could not delete reply", error);
+      setReplyError(error.message);
+      return;
+    }
+    setConfirmDelete(null);
+    loadTopic();
+  };
+
+  if (state.loading) return <><Header/><main className="community-detail-page"><SkeletonList rows={6}/></main><Footer/></>;
+  if (state.error || !state.topic) return <><Header/><main className="profile-signed-out"><MessageCircle size={34}/><h1>Topic not found</h1><p>{state.error?.message || "This discussion may have been deleted."}</p><a className="button primary" href="/community">Back to Community</a></main><Footer/></>;
+
+  const topic = state.topic;
+  const canMarkBest = user?.id === topic.author_id && topic.topic_type === "question";
+  return (
+    <>
+      <Header />
+      <main className="community-detail-page">
+        <Breadcrumb items={["Community", topic.title]} />
+        <article className="topic-detail-card">
+          <div className="topic-detail-head">
+            <div><div className="topic-badges"><span style={{ "--category-color": categoryColor(topic.forum_categories) }}>{topic.forum_categories?.name || "General"}</span><em>{topicTypeIcon(topic.topic_type)} {topic.topic_type}</em>{topic.is_pinned && <em>📌 Pinned</em>}</div><h1>{topic.title}</h1><p>By {forumAuthorName(topic)} · {relativeTime(topic.created_at)}</p></div>
+            <aside><button className={state.liked ? "active" : ""} onClick={toggleTopicLike}>▲ {topic.like_count || 0}</button><button className={state.bookmarked ? "active" : ""} onClick={toggleBookmark}>{state.bookmarked ? "★ Saved" : "☆ Save"}</button></aside>
+          </div>
+          <div className="markdown-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(topic.body) }} />
+          <div className="topic-tags">{topicTags(topic).map((tag) => <span key={tag}>{tag}</span>)}</div>
+          {isAdmin && <div className="admin-topic-actions"><button onClick={togglePin}>{topic.is_pinned ? "Unpin" : "Pin"}</button><button onClick={() => setConfirmDelete({ type: "topic" })}>Delete Topic</button></div>}
+        </article>
+        <section className="reply-section">
+          <h2>{state.replies.length} Replies</h2>
+          {state.replies.map((reply) => <article className={`reply-card ${reply.id === topic.best_answer_reply_id ? "best-answer" : ""}`} key={reply.id}>{reply.id === topic.best_answer_reply_id && <strong className="best-answer-badge">✓ Best Answer</strong>}<div><span className="reply-avatar">{forumAuthorName(reply).slice(0, 2).toUpperCase()}</span><p><b>{forumAuthorName(reply)}</b><small>{relativeTime(reply.created_at)}</small></p></div><div className="markdown-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(reply.body) }} /><footer><button className={`reply-upvote ${state.likedReplies.has(reply.id) ? "active" : ""}`} onClick={() => toggleReplyLike(reply)}>▲ {reply.like_count || 0}</button>{canMarkBest && reply.id !== topic.best_answer_reply_id && <button onClick={() => markBestAnswer(reply)}>Mark as Best Answer</button>}{isAdmin && <button onClick={() => setConfirmDelete({ type: "reply", reply })}>Delete</button>}</footer></article>)}
+          <form className="reply-composer" onSubmit={submitReply}>
+            <label>Reply<textarea value={replyBody} onChange={(event) => setReplyBody(event.target.value)} placeholder="Add your reply. Markdown supported." /></label>
+            {replyError && <div className="login-error" role="alert"><strong>{replyError}</strong></div>}
+            <button className="primary-login" disabled={submitting}>{submitting ? "Posting..." : "Post Reply"}</button>
+          </form>
+        </section>
+      </main>
+      {confirmDelete && <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+        <div className="delete-confirm-modal">
+          <button className="modal-close" onClick={() => setConfirmDelete(null)} aria-label="Close"><X /></button>
+          <h2 id="delete-confirm-title">Delete {confirmDelete.type === "topic" ? "topic" : "reply"}?</h2>
+          <p>This will hide it from public forum views. The action can still be reviewed in the database if needed.</p>
+          <div>
+            <button onClick={() => setConfirmDelete(null)}>Cancel</button>
+            <button className="danger" onClick={() => confirmDelete.type === "topic" ? softDeleteTopic() : softDeleteReply(confirmDelete.reply)}>Delete</button>
+          </div>
+        </div>
+      </div>}
+      <Footer />
+    </>
   );
 }
 
@@ -2097,7 +2734,7 @@ function LoginPlaceholderModal({ onClose }) {
       <div className="community-login-modal">
         <button className="modal-close" onClick={onClose} aria-label="Close"><X /></button>
         <h2 id="community-login-title">Login to continue</h2>
-        <p>Discourse Connect SSO is planned for Phase 2. For now, the community is available in read-only mode.</p>
+        <p>Log in with your Mundhe Banni account to post topics, reply, like, and bookmark discussions.</p>
         <button>Continue with Google</button>
         <button>Continue with LinkedIn</button>
         <div><span></span>or<span></span></div>
@@ -2264,15 +2901,32 @@ function AdminAttention() {
 
 function AdminModerationPage() {
   const [preview, setPreview] = React.useState(null);
+  const [state, setState] = React.useState({ topics: [], loading: true, error: null });
+  React.useEffect(() => {
+    if (!supabase) {
+      setState({ topics: [], loading: false, error: new Error("Supabase is not configured.") });
+      return undefined;
+    }
+    let cancelled = false;
+    supabase
+      .from("forum_topics")
+      .select("id, slug, title, body, topic_type, is_pinned, deleted_at, reply_count, like_count, created_at, profiles!forum_topics_author_id_fkey ( id, username, display_name, role ), forum_categories ( name )")
+      .order("created_at", { ascending: false })
+      .limit(30)
+      .then(({ data, error }) => {
+        if (!cancelled) setState({ topics: data || [], loading: false, error });
+      });
+    return () => { cancelled = true; };
+  }, []);
   return (
     <AdminShell>
-      <AdminPageHeader title="Content Moderation" subtitle="Posts flagged by automated moderation or reported by community members." />
-      <AdminTabs tabs={["Pending Review (12)", "Approved", "Rejected", "All"]} />
-      <AdminFilters search="Search post content or author..." filters={["Flag Reason", "Category", "Date Range"]} />
+      <AdminPageHeader title="Discussion Moderation" subtitle="Review native forum topics, pinned posts, deleted content, and unanswered discussions." />
+      <AdminTabs tabs={["Recent Topics", "Pinned", "Deleted", "Questions"]} />
+      <AdminFilters search="Search topic title or author..." filters={["Post Type", "Category", "Date Range"]} />
       <section className="admin-table-card">
-        <div className="admin-table moderation"><div>Post</div><div>Author</div><div>Flag Reason</div><div>Flagged</div><div>Status</div><div>Actions</div>{moderationRows.map((row) => <React.Fragment key={row[0]}><button className="admin-post-cell" onClick={() => setPreview(row)}><strong>{row[0]}</strong><small>{row[1]}</small><span>General</span></button><AdminUserCell name={row[2]} role={row[3]} /><div><span className={`admin-pill ${row[4].toLowerCase().replace("-", "")}`}>{row[4]}</span>{row[4] === "User-Reported" && <small>by Priya K.</small>}</div><div>{row[5]}</div><div><span className="admin-pill review">⏳ {row[6]}</span></div><AdminActions /></React.Fragment>)}</div>
+        <div className="admin-table moderation"><div>Topic</div><div>Author</div><div>Type</div><div>Activity</div><div>Status</div><div>Actions</div>{state.loading ? <div className="admin-table-loading">Loading discussions...</div> : state.error ? <div className="admin-table-loading">Could not load discussions: {state.error.message}</div> : state.topics.map((topic) => <React.Fragment key={topic.id}><button className="admin-post-cell" onClick={() => setPreview(topic)}><strong>{topic.title}</strong><small>{stripMarkdown(topic.body).slice(0, 110)}</small><span>{topic.forum_categories?.name || "General"}</span></button><AdminUserCell name={forumAuthorName(topic)} role={topic.profiles?.role || "member"} /><div><span className="admin-pill review">{topicTypeIcon(topic.topic_type)} {topic.topic_type}</span></div><div>{relativeTime(topic.created_at)}<small>{topic.reply_count || 0} replies · ▲ {topic.like_count || 0}</small></div><div><span className={`admin-pill ${topic.deleted_at ? "danger" : topic.is_pinned ? "review" : "approved"}`}>{topic.deleted_at ? "Deleted" : topic.is_pinned ? "Pinned" : "Live"}</span></div><div className="admin-actions"><a className="admin-outline" href={topicUrl(topic)}>Open</a></div></React.Fragment>)}</div>
       </section>
-      <nav className="pagination admin-pagination">{["‹", "1", "2", "3", "›"].map((item) => <button className={item === "1" ? "active" : ""} key={item}>{item}</button>)}</nav>
+      <nav className="pagination admin-pagination">{["‹", "1", "›"].map((item) => <button className={item === "1" ? "active" : ""} key={item}>{item}</button>)}</nav>
       {preview && <AdminPreviewModal row={preview} onClose={() => setPreview(null)} />}
     </AdminShell>
   );
@@ -2321,7 +2975,13 @@ function AdminActions({ compact = false }) {
 }
 
 function AdminPreviewModal({ row, onClose }) {
-  return <div className="modal-overlay"><div className="admin-preview-modal"><button className="modal-close" onClick={onClose}><X /></button><h2>{row[0]}</h2><AdminUserCell name={row[2]} role={row[3]} /><p>{row[1]} This is the full post content preview shown to the platform admin before taking a moderation action.</p><div className="flag-box"><strong>Flagged for: {row[4]}</strong><small>Auto-detected or reported by community moderation.</small></div><small>This author has 2 previous flags. <a href="#history">View history →</a></small><div className="admin-modal-actions"><button>✓ Approve & Publish</button><button>✎ Edit Content</button><button>✕ Reject & Remove</button></div></div></div>;
+  const isTopic = !Array.isArray(row);
+  const title = isTopic ? row.title : row[0];
+  const body = isTopic ? row.body : row[1];
+  const author = isTopic ? forumAuthorName(row) : row[2];
+  const role = isTopic ? row.profiles?.role || "member" : row[3];
+  const status = isTopic ? row.deleted_at ? "Deleted" : row.is_pinned ? "Pinned" : "Live" : row[4];
+  return <div className="modal-overlay"><div className="admin-preview-modal"><button className="modal-close" onClick={onClose}><X /></button><h2>{title}</h2><AdminUserCell name={author} role={role} /><p>{stripMarkdown(body)} {isTopic ? "" : "This is the full post content preview shown to the platform admin before taking a moderation action."}</p><div className="flag-box"><strong>Status: {status}</strong><small>{isTopic ? `${row.reply_count || 0} replies · ${row.like_count || 0} likes · ${row.topic_type}` : "Auto-detected or reported by community moderation."}</small></div>{isTopic && <a className="admin-link" href={topicUrl(row)}>Open discussion →</a>}<div className="admin-modal-actions"><button>✓ Mark Reviewed</button><button>📌 Pin/Unpin in Topic</button><button>Open Detail</button></div></div></div>;
 }
 
 function AdminEnquiries() {
@@ -2333,7 +2993,7 @@ function AdminFeaturedGroup() {
 }
 
 function AdminTaxonomyPage() {
-  return <AdminShell><AdminPageHeader title="Categories & Tags" subtitle="Manage the discussion taxonomy used across the Community page." action={<button className="admin-primary">+ New Category</button>} /><p className="admin-note">Changes here sync with the connected Discourse forum.</p><AdminTabs tabs={["Categories", "Tags"]} /><AdminDataTable columns={["Color", "Name", "Description", "Topics", "Actions"]} rows={[["🔵", "Fundraising", "Term sheets, investors, valuations", "12"], ["🟣", "Product", "Product strategy, roadmaps, MVPs", "8"], ["🟢", "Legal", "Incorporation, compliance, contracts", "15"], ["🔴", "Marketing", "Growth, SEO, branding", "6"], ["⚫", "Operations", "Hiring, processes, vendor mgmt", "4"], ["🟪", "Technology", "Engineering, AI tools, stack", "19"]]} type="taxonomy" /></AdminShell>;
+  return <AdminShell><AdminPageHeader title="Categories & Tags" subtitle="Manage the discussion taxonomy used across the Community page." action={<button className="admin-primary">+ New Category</button>} /><p className="admin-note">Changes here manage the native Mundhe Banni forum taxonomy.</p><AdminTabs tabs={["Categories", "Tags"]} /><AdminDataTable columns={["Color", "Name", "Description", "Topics", "Actions"]} rows={[["🔵", "Fundraising", "Term sheets, investors, valuations", "12"], ["🟣", "Product", "Product strategy, roadmaps, MVPs", "8"], ["🟢", "Legal", "Incorporation, compliance, contracts", "15"], ["🔴", "Marketing", "Growth, SEO, branding", "6"], ["⚫", "Operations", "Hiring, processes, vendor mgmt", "4"], ["🟪", "Technology", "Engineering, AI tools, stack", "19"]]} type="taxonomy" /></AdminShell>;
 }
 
 function AdminAnalyticsPage() {
@@ -2345,7 +3005,7 @@ function AdminAuditPage() {
 }
 
 function AdminSettingsPage() {
-  return <AdminShell><AdminPageHeader title="Platform Settings" /><section className="admin-settings-layout"><nav>{["General", "Notifications", "Feature Flags", "SEO", "Integrations"].map((item, index) => <button className={index === 0 ? "active" : ""} key={item}>{item}</button>)}</nav><div className="admin-card settings-card"><label>Platform name<input defaultValue="Mundhe Banni" /></label><label>Support email<input defaultValue="support@mundhebanni.com" /></label><label>Default timezone<select><option>Asia/Kolkata</option></select></label><label className="admin-switch"><input type="checkbox" />Maintenance mode</label><h3>Integrations</h3><p>🟢 Discourse connected · https://mundebanni-community.discourse.group</p><button className="admin-outline">Test Connection</button></div></section></AdminShell>;
+  return <AdminShell><AdminPageHeader title="Platform Settings" /><section className="admin-settings-layout"><nav>{["General", "Notifications", "Feature Flags", "SEO", "Integrations"].map((item, index) => <button className={index === 0 ? "active" : ""} key={item}>{item}</button>)}</nav><div className="admin-card settings-card"><label>Platform name<input defaultValue="Mundhe Banni" /></label><label>Support email<input defaultValue="support@mundhebanni.com" /></label><label>Default timezone<select><option>Asia/Kolkata</option></select></label><label className="admin-switch"><input type="checkbox" />Maintenance mode</label><h3>Integrations</h3><p>🟢 Native forum enabled via Supabase</p><button className="admin-outline">Test Connection</button></div></section></AdminShell>;
 }
 
 function AdminBannersPage() {
@@ -2398,6 +3058,8 @@ function HomePage() {
 function App() {
   if (window.location.pathname.startsWith("/admin")) return <AdminApp />;
   if (window.location.pathname === "/login") return <LoginPage />;
+  if (window.location.pathname === "/community/new") return <CommunityNewTopicPage />;
+  if (window.location.pathname.startsWith("/community/t/")) return <CommunityTopicDetailPage slug={decodeURIComponent(window.location.pathname.split("/")[3] || "")} />;
   if (window.location.pathname === "/community") return <CommunityPage />;
   if (window.location.pathname === "/my-profile") return <MyProfilePage />;
   if (window.location.pathname === "/people") return <PeoplePage />;
